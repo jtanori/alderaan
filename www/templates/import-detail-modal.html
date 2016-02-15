@@ -1,0 +1,21 @@
+<ion-modal-view>
+    <ion-header-bar>
+        <h1 class="title">{{previewCategoryName}}</h1>
+    </ion-header-bar>
+    <ion-content>
+        <table id="import-table" class="zebra bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Keywords</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="record in previewRecords">
+                    <td>{{record.name}}</td>
+                    <td><p>{{record.keywords.join(', ')}}<p></td>
+                </tr>
+            </tbody>
+        </table>
+    </ion-content>
+</ion-modal-view>

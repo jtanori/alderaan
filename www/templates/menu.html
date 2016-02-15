@@ -1,0 +1,47 @@
+<ion-side-menus enable-menu-with-back-views="false">
+    <ion-side-menu-content drag-content="false" delegate-handle="mainContentHandle">
+        <ion-nav-bar class="bar-stable nav-title-slide-ios7" animation="slide-left-right">
+        </ion-nav-bar>
+        <ion-nav-view name="menuContent" animation="slide-left-right"></ion-nav-view>
+    </ion-side-menu-content>
+
+    <ion-side-menu side="left" expose-aside-when="large">
+        <ion-header-bar class="bar-stable">
+            <h1 class="title">Menu</h1>
+        </ion-header-bar>
+        <ion-content>
+            <ion-list>
+                <ion-item menu-close href="#/home">
+                    <i class="icon ion-home"></i> Home
+                </ion-item>
+                <ion-item menu-close href="#/roles" ng-if="$parent.user.is('SuperAdmin') || $parent.user.is('Admin')">
+                    <i class="icon ion-ios-body"></i> Roles
+                </ion-item>
+                <ion-item menu-close href="#/users" ng-if="$parent.user.is('SuperAdmin') || $parent.user.is('Admin')">
+                    <i class="icon ion-ios-people"></i> Users
+                </ion-item>
+                <ion-item menu-close href="#/categories" ng-if="$parent.user.is('SuperAdmin') || $parent.user.is('Admin')">
+                    <i class="icon ion-pound"></i> Categories
+                </ion-item>
+                <ion-item menu-close href="#/analytics">
+                    <i class="icon ion-connection-bars"></i> Analytics
+                </ion-item>
+                <ion-item menu-close href="#/venues"  ng-if="$parent.user.is('SuperAdmin') || $parent.user.is('Admin') || $parent.user.is('Corporate') || $parent.user.is('Collaborator')">
+                    <i class="icon ion-bag"></i> Venues
+                </ion-item>
+                <ion-item menu-close href="#/geo" ng-if="$parent.user.is('SuperAdmin') || $parent.user.is('Admin')">
+                    <i class="icon ion-ios-world"></i> Geospatial
+                </ion-item>
+                <ion-item menu-close href="#/import" ng-if="$parent.user.is('SuperAdmin') || $parent.user.is('Admin')">
+                    <i class="icon ion-upload"></i> Import
+                </ion-item>
+                <ion-item menu-close ng-click="logout()">
+                    <i class="icon ion-log-out"></i> Logout
+                </ion-item>
+            </ion-list>
+            <!--div class="text-center">
+                <a class="button button-positive button-clear button-full" href="#/forgot">Forgot/Reset Password</a>
+            </div-->
+        </ion-content>
+    </ion-side-menu>
+</ion-side-menus>

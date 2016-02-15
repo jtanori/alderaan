@@ -1,0 +1,13 @@
+{
+  "name": "JoundManager",
+  "private": "true",
+  "devDependencies": {
+    "ionic": "driftyco/ionic-bower#1.2.4"
+  },
+  "dependencies": {
+    "ng-file-upload": "~11.2.3",
+    "papaparse": "~4.1.2",
+    "jsTag": "~0.3.6",
+    "ng-tags-input": "~3.0.0"
+  }
+}

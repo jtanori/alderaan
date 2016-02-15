@@ -1,0 +1,68 @@
+<ion-view view-title="Role: {{role.name}}">
+    <ion-nav-buttons side="left">
+        <a href="#/roles" class="button button-icon ion-ios-arrow-back"></a>
+    </ion-nav-buttons>
+    <ion-pane>
+        <ion-tabs class="tabs-icon-top">
+            <ion-tab title="Users" icon-on="ion-ios-person" icon-off="ion-ios-person-outline" on-select="getUsers()">
+                <ion-nav-view class="has-header">
+                    <form class="bar bar-header item-input-inset">
+                        <label class="item-input-wrapper">
+                            <i class="icon ion-ios-search placeholder-icon"></i>
+                            <input type="search" placeholder="Search" ng-model="data.q" ng-change="searchUser(data.q)" ng-model-options="{ debounce: 500 }">
+                        </label>
+                        <button class="button button-clear" type="submit">
+                            Search
+                        </button>
+                    </form>
+                    <ion-content>
+                        <div class="padding text-center" ng-if="loadingUsers">
+                            <ion-spinner></ion-spinner>
+                            <div>Loading users</div>
+                        </div>
+                        <ion-list ng-if="!loading">
+                            <ion-item class="item-divider" ng-if="users.length">
+                                <h2>Enroled Users</h2>
+                            </ion-item>
+                            <ion-item ng-repeat="user in users" href="#/users/{{user.objectId}}" ng-show="!user.hidden">
+                                <h2><span ng-if="user.name">{{user.firstName}} {{user.lastName}} - </span> {{user.username}}</h2>
+                                <p ng-if="user.username != user.email && user.email">({{user.email}})</p>
+                                <p>Created: {{user.createdAt}}, Last updated: {{user.updatedAt}}</p>
+                            </ion-item>
+                            <ion-item class="item-divider" ng-if="nonEnroledUsers.length">
+                                <h2>Non Enroled Users</h2>
+                            </ion-item>
+                            <ion-item ng-repeat="user in nonEnroledUsers" ng-show="!user.hidden" class="item-button-right" href="#/users/{{user.objectId}}" >
+                                <h2><span ng-if="user.name">{{user.firstName}} {{user.lastName}} - </span> {{user.username}}</h2>
+                                <p ng-if="user.username != user.email && user.email">({{user.email}})</p>
+                                <p>Created: {{user.createdAt}}, Last updated: {{user.updatedAt}}</p>
+                                <button class="button button-positive" ng-click="addUserToRole(user)" type="button">
+                                    Add to Role
+                                </button>
+                            </ion-item>
+                        </ion-list>
+                    </ion-content>
+                </ion-nav-view>
+            </ion-tab>
+            <ion-tab title="Configuration" icon-on="ion-ios-gear" icon-off="ion-ios-gear-outline" on-select="config()">
+                <ion-nav-view>
+                    <ion-content>
+                        <div class="padding text-center" ng-if="loadingRoles">
+                            <ion-spinner></ion-spinner>
+                            <div>Loading Roles</div>
+                        </div>
+                        <ion-list ng-if="!loadingRoles">
+                            <ion-item class="item-divider">
+                                <h2>Roles</h2>
+                            </ion-item>
+                            <ion-checkbox ng-repeat="role in roles" ng-model="role.checked" ng-change="addRole(role.objectId, role.checked)">
+                                {{role.name}}
+                            </ion-checkbox>
+                        </ion-list>
+                    </ion-content>
+                </ion-nav-view>
+            </ion-tab>
+        </ion-tabs>
+    </ion-pane>
+
+</ion-view>

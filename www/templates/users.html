@@ -1,0 +1,31 @@
+<ion-view view-title="Users">
+    <ion-nav-buttons side="right">
+        <a class="button button-icon button-clear ion-refresh" ng-disabled="loading" ng-click="refresh()"></a>
+        <a class="button button-icon button-clear ion-plus-round" ng-disabled="loading" ng-click="addUser()"></a>
+    </ion-nav-buttons>
+    <ion-content>
+        <form class="bar bar-header item-input-inset">
+            <label class="item-input-wrapper">
+                <i class="icon ion-ios-search placeholder-icon"></i>
+                <input type="search" placeholder="Search" ng-model="data.q" ng-change="refresh(data.q)" ng-model-options="{ debounce: 500 }">
+            </label>
+            <button class="button button-clear" type="submit">
+                Search
+            </button>
+        </form>
+        <div class="padding text-center" ng-if="loading">
+            <ion-spinner></ion-spinner>
+            <div>Loading Users</div>
+        </div>
+        <ion-list ng-if="!loading">
+            <ion-item class="item-divider" ng-if="users.length">
+                <h2>Users</h2>
+            </ion-item>
+            <ion-item ng-repeat="user in users" href="#/users/{{user.objectId}}">
+                <h2><span ng-if="user.name">{{user.firstName}} {{user.lastName}} - </span> {{user.username}}</h2>
+                <p ng-if="user.username != user.email && user.email">({{user.email}})</p>
+                <p>Created: {{user.createdAt}}, Last updated: {{user.updatedAt}}</p>
+            </ion-item>
+        </ion-list>
+    </ion-content>
+</ion-view>

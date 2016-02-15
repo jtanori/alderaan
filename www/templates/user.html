@@ -1,0 +1,73 @@
+<ion-view view-title="Profile">
+    <ion-nav-buttons side="left">
+        <a ng-click="back()" class="button button-icon ion-ios-arrow-back"></a>
+    </ion-nav-buttons>
+    <ion-content>
+        <div class="text-center padding" ng-if="loading"><ion-spinner></ion-spinner><p>Loading User Details...</p></div>
+        <div ng-if="!loading && user">
+            <div class="row">
+                <div class="col">
+                    <div class="list card">
+                        <div class="item">
+                            <h2>Profile</h2>
+                        </div>
+                        <div class="item">
+                            <h2><span ng-if="user.name">{{user.firstName}} {{user.lastName}} - </span>{{user.username}}</h2>
+                            <p ng-if="user.username != user.email && user.email">({{user.email}})</p>
+                            <p>Created: {{user.createdAt}}, Last updated: {{user.updatedAt}}</p>
+                        </div>
+
+                        <div class="item item-image" ng-if="user.avatar">
+                            <img src="{{user.avatar}}"/>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="list card">
+                        <div class="item">
+                            <h2>Venues</h2>
+                        </div>
+
+                        <div class="item item-body">
+                            <a href="" class="button button-small"><i class="icon ion-link"></i> Link To Venue</a>
+                            <a href="" class="button button-small"><i class="icon ion-plus"></i> Add New Venue</a>
+                        </div>
+
+                        <ion-item ng-repeat="venue in venues" href="#/venues/{{venue.objectId}}" class="item-positive">
+                            <h2>{{venue.name}}</h2>
+                            <p>Keywords: {{venue.keywords}}</p>
+                            <p>Address: </p>
+                        </ion-item>
+
+                        <ion-item ng-if="!venues.length">
+                            <h2 class="assertive text-center">No venues found!</h2>
+                        </ion-item>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="list card">
+                        <div class="item">
+                            <h2>Roles</h2>
+                        </div>
+
+                        <div class="item item-body">
+                            <a href="" class="button button-small"><i class="icon ion-link"></i> Link To Role</a>
+                        </div>
+
+                        <ion-item ng-repeat="role in roles" class="item-button-right">
+                            <h2>{{role.name}}</h2>
+                            <p>Priority Level: {{role.priority}}</p>
+                            <button class="button" ng-click="" type="button">
+                                Revoke
+                            </button>
+                        </ion-item>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div ng-if="!loading && error">
+            <h2 class="assertive">{{error}}</h2>
+        </div>
+    </ion-content>
+</ion-view>

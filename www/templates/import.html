@@ -1,0 +1,63 @@
+<ion-view view-title="Import Venues">
+    <ion-content delegate-handle="importScrollHandle" ng-class="{'has-footer': records}">
+        <div class="padding text-center" ng-if="loadingCategories">
+            <ion-spinner></ion-spinner>
+            <p>Loading Configuration...</p>
+        </div>
+        <div ng-if="!loadingCategories">
+            <div class="padding text-center" ng-if="loading">
+                <ion-spinner></ion-spinner>
+                <p>Working...</p>
+            </div>
+            <div class="padding" ng-if="!records">
+                <div id="import-drop" class="container row">
+                    <div class="col col-center text-center">
+                        <div class="button button-positive" ngf-select="upload($files)" ngf-multiple="false" ng-if="!loading && !records">Select File to Import</div>
+                    </div>
+                </div>
+            </div>
+            <div ng-if="records && !loading" class="padding">
+                <table id="import-table" class="zebra bordered">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Identifier</th>
+                            <th>Records</th>
+                            <th>Category</th>
+                            <th>2nd Run Keywords</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="(key, record) in records" ng-class="{disabled: record.saving}">
+                            <td class="text-center"><button type="button" class="button button-icon ion-search button-small" ng-click="detail(record)"></button</td>
+                            <td>{{key}}</td>
+                            <td class="text-center">{{record.length}}</td>
+                            <td class="text-center">
+                                <select ng-model="record.category">
+                                    <option value="{{c.id}}" ng-repeat="c in categories" required>{{c.name}}</option>
+                                </select>
+                            </td>
+                            <td class="text-center"><input ng-model="record._additionalKeywords"></td>
+                            <td class="text-center"><button type="button" class="button button-small button-stable" ng-click="run(record)">Run</button></td>
+                            <td class="text-center">
+                                <ion-spinner ng-if="record.saving"></ion-spinner>
+                                <button type="button" class="button button-small button-positive" ng-click="save(record, $index)" ng-if="!record.saving">Save</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </ion-content>
+    <ion-footer-bar class="bar-stable" ng-if="records">
+        <div class="buttons">
+            <button class="button button-icon ion-arrow-left-b icon-left" ng-disabled="currentPage == 0 || loading" ng-click="prev()">Prev</button>
+        </div>
+        <h1 class="title">{{currentPage+1}}/{{pages}}</h1>
+        <div class="buttons">
+            <button class="button button-icon ion-arrow-right-b icon-right" ng-disabled="currentPage == chunks.length-1 || loading" ng-click="next()">Next</button>
+        </div>
+    </ion-footer-bar>
+</ion-view>

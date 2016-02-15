@@ -1,0 +1,70 @@
+<ion-view view-title="{{country.name}}">
+    <ion-nav-buttons side="left">
+        <a href="#/geo" class="button button-icon ion-ios-arrow-back"></a>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="right">
+        <a ng-click="import()" class="button button-icon ion-ios-upload-outline" ngf-select="upload($files)" ngf-multiple="false" ng-model="states" name="file" ngf-pattern="'text/csv'"
+    ngf-accept="'text/csv'">Import States</a>
+    </ion-nav-buttons>
+    <ion-content delegate-handle="countryScroll">
+        <div class="text-center padding" ng-if="loading"><ion-spinner></ion-spinner><p>Loading Country...</p></div>
+        <div ng-if="!loading && country">
+            <div class="row">
+                <div class="col">
+                    <form class="card" ng-submit="save()">
+                        <div class="item" ng-if="country">
+                            <h2>Country Details</h2>
+                        </div>
+                        <label class="item item-input item-stacked-label" ng-if="country">
+                            <span class="input-label">Name</span>
+                            <input type="text" value="{{country.name}}" ng-model="country.name" required/>
+                        </label>
+                        <label class="item item-input item-stacked-label" ng-if="country">
+                            <span class="input-label">Code</span>
+                            <input type="text" value="{{country.code}}" ng-model="country.code" required/>
+                        </label>
+                        <label class="item item-input item-stacked-label" ng-if="country">
+                            <span class="input-label">Abbreviation</span>
+                            <input type="text" value="{{country.abbr}}" ng-model="country.abbr" required/>
+                        </label>
+                        <div class="item" ng-if="!saving" ng-if="category">
+                            <h2 class="assertive">Disclaimer</h2>
+                        </div>
+                        <div class="item item-body" ng-if="!saving && country">
+                            <p>Be careful when dealing with countries, any change made to the configuration may affect the pointers in the whole venues' system, any abuse or wrongdoing will be tracked.</p>
+                        </div>
+                        <div class="item" ng-if="!saving && country">
+                            <button class="button button-positive button-block" type="submit" ng-disabled="saving">Save Changes</button>
+                        </div>
+                        <div class="item text-center" ng-if="saving && country">
+                            <ion-spinner></ion-spinner> Saving
+                        </div>
+                        <div class="item assertive" ng-if="error">
+                            <h2>Error</h2>
+                            <p>{{error}}</p>
+                        </div>
+                    </form>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="item">
+                            <h2>States ({{country.states.length}})</h2>
+                        </div>
+                        <div class="text-center item" ng-if="loadingStates"><ion-spinner></ion-spinner><p>Loading States</p></div>
+                        <ion-item ng-repeat="state in country.states" ng-if="!loadingStates && !statesError" class="item-button-right" ng-click="goState(state.objectId)">
+                            <h2 class="positive">{{$index+1}} - {{state.name}}</h2>
+                            <button type="button" class="button button-clear button-positive button-icon ion-chevron-right"></button>
+                        </ion-item>
+                        <div class="item positive" ng-if="!loading && !loadingStates && country.states.length == 0">
+                            <p>No states found, please add one or try the import tool.</p>
+                        </div>
+                        <div class="item assertive" ng-if="statesError">
+                            <h2>Error</h2>
+                            <p>{{statesError}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ion-content>
+</ion-view>

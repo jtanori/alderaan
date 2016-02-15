@@ -1,0 +1,25 @@
+<ion-view view-title="Forgot Password">
+    <ion-pane>
+        <form ng-submit="forgot()" id="forgot">
+            <div class="card">
+                <label class="item text-center">
+                    <h2>Forgot Password</h2>
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">Username</span>
+                    <input type="text" ng-model="user.username">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">Phone Number</span>
+                    <input type="password" ng-model="user.phone">
+                </label>
+                <label class="item">
+                    <button class="button button-block button-positive" type="submit">Send Password Recovery Code</button>
+                </label>
+                <a class="text-center item positive" href="#/login">
+                    Login instead
+                </a>
+            </div>
+        </form>
+    </ion-pane>
+</ion-view>

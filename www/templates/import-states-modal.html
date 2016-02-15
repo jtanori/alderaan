@@ -1,0 +1,32 @@
+<ion-modal-view>
+    <ion-header-bar>
+        <h1 class="title">{{country.name}}</h1>
+    </ion-header-bar>
+    <ion-content class="padding has-footer">
+        <table id="import-table" class="zebra bordered">
+            <thead>
+                <tr>
+                    <th>DenueID</th>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Abbr</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="state in states">
+                    <td>{{state.did}}</td>
+                    <td>{{state.name}}</td>
+                    <td>{{state.code}}</td>
+                    <td>{{state.abbr}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </ion-content>
+    <ion-footer-bar class="bar-stable">
+        <h1 class="title"></h1>
+        <div class="buttons" side="right">
+            <button type="button" class="button button-positive" ng-click="addStatesCollection()">Save</button>
+            <button type="button" class="button button-assertive button-clear" ng-click="cancelImport()">Cancel</a>
+        </div>
+    </ion-footer-bar>
+</ion-modal-view>

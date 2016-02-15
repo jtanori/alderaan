@@ -1,0 +1,20 @@
+<ion-view view-title="Roles">
+    <ion-nav-buttons side="right">
+        <a class="button button-icon button-clear ion-refresh" ng-disabled="loading" ng-click="refresh()"></a>
+    </ion-nav-buttons>
+    <ion-content>
+        <div class="padding text-center" ng-if="loading">
+            <ion-spinner></ion-spinner>
+            <div>Loading Roles</div>
+        </div>
+        <ion-list ng-if="!loading">
+            <ion-item class="item-divider" ng-if="roles.length">
+                <h2>Roles</h2>
+            </ion-item>
+            <ion-item ng-repeat="role in roles" href="#/roles/{{role.objectId}}">
+                <h2>{{role.name}}</h2>
+                <p>Priority Level: {{role.priority}}</p>
+            </ion-item>
+        </ion-list>
+    </ion-content>
+</ion-view>

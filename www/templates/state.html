@@ -1,0 +1,68 @@
+<ion-view view-title="{{state.name}}">
+    <ion-nav-buttons side="left">
+        <a href="#/country/{{state.country.objectId}}" class="button button-icon ion-ios-arrow-back"></a>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="right">
+        <a ng-click="import()" class="button button-icon ion-ios-upload-outline" ngf-select="upload($files)" ngf-multiple="false" ng-model="states" name="file" ngf-pattern="'text/csv'"
+    ngf-accept="'text/csv'" ng-disabled="loading || loadingStates">Import Municipalities</a>
+    </ion-nav-buttons>
+    <ion-content delegate-handle="stateScroll">
+        <div class="text-center padding" ng-if="loading"><ion-spinner></ion-spinner><p>Loading State...</p></div>
+        <div ng-if="!loading && state">
+            <div class="row">
+                <div class="col">
+                    <form class="card" ng-submit="save()">
+                        <div class="item" ng-if="state">
+                            <h2>State Details</h2>
+                        </div>
+                        <label class="item item-input item-stacked-label" ng-if="state">
+                            <span class="input-label">DID</span>
+                            <input type="text" value="{{state.did}}" ng-model="state.did" required disabled/>
+                        </label>
+                        <label class="item item-input item-stacked-label" ng-if="state">
+                            <span class="input-label">Name</span>
+                            <input type="text" value="{{state.name}}" ng-model="state.name" required/>
+                        </label>
+                        <label class="item item-input item-stacked-label" ng-if="state">
+                            <span class="input-label">Code</span>
+                            <input type="text" value="{{state.code}}" ng-model="state.code" required/>
+                        </label>
+                        <label class="item item-input item-stacked-label" ng-if="state">
+                            <span class="input-label">Abbreviation</span>
+                            <input type="text" value="{{state.abbr}}" ng-model="state.abbr" required/>
+                        </label>
+                        <div class="item" ng-if="!saving && state">
+                            <button class="button button-positive button-block" type="submit" ng-disabled="saving">Save Changes</button>
+                        </div>
+                        <div class="item text-center" ng-if="saving && state">
+                            <ion-spinner></ion-spinner> Saving
+                        </div>
+                        <div class="item assertive" ng-if="error">
+                            <h2>Error</h2>
+                            <p>{{error}}</p>
+                        </div>
+                    </form>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="item">
+                            <h2>Municipalities ({{state.municipalities.length}})</h2>
+                        </div>
+                        <div class="text-center item" ng-if="loadingMunicipalities"><ion-spinner></ion-spinner><p>Loading Municipalities</p></div>
+                        <ion-item ng-repeat="city in state.municipalities" ng-if="!loadingMunicipalities && !municipalitiesError" class="item-button-right" ng-click="goCity(city.objectId)">
+                            <h2 class="positive">{{$index+1}} - {{city.name}}</h2>
+                            <button type="button" class="button button-clear button-positive button-icon ion-chevron-right"></button>
+                        </ion-item>
+                        <div class="item positive" ng-if="!loading && !loadingMunicipalities && state.municipalities.length == 0">
+                            <p>No municipalities found, please add one or try the import tool.</p>
+                        </div>
+                        <div class="item assertive" ng-if="municipalitiesError">
+                            <h2>Error</h2>
+                            <p>{{citiesError}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ion-content>
+</ion-view>

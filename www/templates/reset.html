@@ -1,0 +1,37 @@
+<ion-view view-title="Reset Password">
+    <ion-pane>
+        <form ng-submit="reset()" id="reset">
+            <div class="card">
+                <label class="item text-center">
+                    <h2>Reset Password</h2>
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">Username</span>
+                    <input type="text" ng-model="user.username">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">Phone Number</span>
+                    <input type="phone" ng-model="user.phone">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">Verification Code</span>
+                    <input type="number" ng-model="user.phone">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">New Password</span>
+                    <input type="password" ng-model="user.phone">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">Confirm New Password</span>
+                    <input type="password" ng-model="user.phone">
+                </label>
+                <label class="item">
+                    <button class="button button-block button-positive" type="submit">Send Password Recovery Code</button>
+                </label>
+                <a class="text-center item positive" href="#/login">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </ion-pane>
+</ion-view>

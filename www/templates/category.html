@@ -1,0 +1,144 @@
+<ion-view view-title="{{category.displayName}}">
+    <ion-nav-buttons side="left">
+        <a href="#/categories" class="button button-icon ion-ios-arrow-back"></a>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="right">
+        <a ng-click="remove()" class="button button-icon ion-ios-trash"></a>
+    </ion-nav-buttons>
+    <ion-content delegate-handle="categoryScroll">
+        <div class="text-center padding" ng-if="loading"><ion-spinner></ion-spinner><p>Loading Category...</p></div>
+        <div ng-if="!loading && category">
+            <div class="row">
+                <div class="col">
+                    <form class="card" ng-submit="save()">
+                        <div class="item" ng-if="category">
+                            <h2>Category Details</h2>
+                        </div>
+                        <label class="item item-input item-stacked-label" ng-if="category">
+                            <span class="input-label">Display Name</span>
+                            <input type="text" value="{{category.displayName}}" ng-model="category.displayName" required/>
+                        </label>
+                        <label class="item item-input item-stacked-label" ng-if="category">
+                            <span class="input-label">Name</span>
+                            <input type="text" value="{{category.name}}" ng-model="category.name" required/>
+                        </label>
+                        <label class="item item-input item-stacked-label" ng-if="category">
+                            <span class="input-label">Pluralized Name</span>
+                            <input type="text" value="{{category.pluralized}}" ng-model="category.pluralized" required/>
+                        </label>
+                        <label class="item item-input item-stacked-label" ng-if="category">
+                            <span class="input-label">Slug</span>
+                            <input type="text" value="{{category.slug}}" ng-model="category.slug" required/>
+                        </label>
+                        <label class="item item-stacked-label" ng-if="category">
+                            <span class="input-label">Keywords</span>
+                            <tags-input ng-model="category.keywords" ng-model="category.keywords" required></tags-input>
+                            <p>Type a keyword and hit enter to add it</p>
+                        </label>
+                        <div class="item item-toggle" ng-if="category">
+                            Active
+                            <label class="toggle toggle-assertive">
+                                <input type="checkbox" ng-model="category.active">
+                                <div class="track">
+                                    <div class="handle"></div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="item" ng-if="!saving" ng-if="category">
+                            <h2 class="assertive">Disclaimer</h2>
+                        </div>
+                        <div class="item item-body" ng-if="!saving && category">
+                            <p>Be careful when dealing with categories, any change made to the configuration will affect the whole system, any abuse or wrongdoing will be tracked.</p>
+                        </div>
+                        <div class="item" ng-if="!saving && category">
+                            <button class="button button-positive button-block" type="submit" ng-disabled="saving">Save Changes</button>
+                        </div>
+                        <div class="item text-center" ng-if="saving && category">
+                            <ion-spinner></ion-spinner> Saving
+                        </div>
+                        <div class="item assertive" ng-if="error">
+                            <h2>Error</h2>
+                            <p>{{localizationsError}}</p>
+                        </div>
+                    </form>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="item">
+                            <h2>Translations</h2>
+                        </div>
+                        <div class="text-center item" ng-if="loadingi18n"><ion-spinner></ion-spinner><p>Loading Translations</p></div>
+                        <ion-item ng-repeat="category in localizedCategories" ng-if="!loadingi18n && !localizationsError">
+                            <div class="card" ng-if="!category.removing">
+                                <div class="item">
+                                    <h2><i class="icon ion-ios-minus-outline" ng-if="!category.collapsed" ng-click="category.collapsed = true"></i><i class="icon ion-ios-plus-outline" ng-if="category.collapsed" ng-click="category.collapsed = false"></i> <span ng-if="category.lang">{{category.lang}} - Translation</span><span ng-if="!category.lang">Translation Details</span></h2>
+                                </div>
+                                <label class="item item-input item-select" ng-show="!category.collapsed">
+                                    <div class="input-label">
+                                        Language
+                                    </div>
+                                    <select ng-model="category.lang" required>
+                                        <option ng-repeat="lang in availableLangs" ng-value="lang">{{lang}}</option>
+                                    </select>
+                                </label>
+                                <label class="item item-input item-stacked-label" ng-show="!category.collapsed">
+                                    <span class="input-label">Display Name</span>
+                                    <input type="text" value="{{category.displayName}}" ng-model="category.displayName"  required/>
+                                </label>
+                                <label class="item item-input item-stacked-label" ng-show="!category.collapsed">
+                                    <span class="input-label">Name</span>
+                                    <input type="text" value="{{category.name}}" ng-model="category.name" required/>
+                                </label>
+                                <label class="item item-input item-stacked-label" ng-show="!category.collapsed">
+                                    <span class="input-label">Pluralized Name</span>
+                                    <input type="text" value="{{category.pluralized}}" ng-model="category.pluralized" required/>
+                                </label>
+                                <label class="item item-input item-stacked-label" ng-show="!category.collapsed">
+                                    <span class="input-label">Slug</span>
+                                    <input type="text" value="{{category.slug}}" ng-model="category.slug" required/>
+                                </label>
+                                <label class="item item-stacked-label" ng-show="!category.collapsed">
+                                    <span class="input-label">Keywords</span>
+                                    <tags-input ng-model="category.keywords" ng-model="category.keywords" required></tags-input>
+                                    <p>Type a keyword and hit enter to add it</p>
+                                </label>
+                                <div class="item item-toggle" ng-show="!category.collapsed">
+                                    Active
+                                    <label class="toggle toggle-assertive">
+                                        <input type="checkbox" ng-model="category.active">
+                                        <div class="track">
+                                            <div class="handle"></div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="item" ng-hide="category.collapsed || category.saving">
+                                    <button type="button" class="button button-clear button-positive" ng-click="saveLocalization(category)">Save</button>
+                                    <button type="button" class="button button-clear button-assertive" ng-if="!category.saved" ng-click="cancelLocalization(category)">Cancel</button>
+                                    <button type="button" class="button button-clear button-assertive" ng-if="category.saved" ng-click="deleteLocalization(category)">Remove</button>
+                                </div>
+                                <div class="item text-center" ng-if="category.saving">
+                                    <ion-spinner></ion-spinner> Saving
+                                </div>
+                            </div>
+                            <div class="card" ng-if="category.removing">
+                                <div class="item text-center">
+                                    <ion-spinner></ion-spinner> Deleting
+                                </div>
+                            </div>
+                        </ion-item>
+                        <div class="item positive" ng-if="!loading && !loadingi18n && localizedCategories.length == 0 && !localizationsError">
+                            <p>No translations found, please add one</p>
+                        </div>
+                        <div class="item assertive" ng-if="localizationsError">
+                            <h2>Error</h2>
+                            <p>{{localizationsError}}</p>
+                        </div>
+                        <div class="item">
+                            <button class="button button-positive button-block" type="button" ng-click="addLocalized()" ng-disabled="!canAddTranslation()"><i class="icon ion-earth"></i> Add Localized Data</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ion-content>
+</ion-view>
