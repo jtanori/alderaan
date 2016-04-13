@@ -15,6 +15,7 @@ angular.module('manager', ['ionic', 'manager.controllers', 'manager.services', '
 .constant('API_URL', 'http://devapi.jound.mx:5000')
 .constant('APP_ID', '24BXvqzE2yuQX5EVM9UPDIh1SyxBZnRMq7BBmo0Y')
 .constant('JS_KEY', 'dHaSGaXxD4ssx7GbPoXFNouJBG5r3pzPdCIPau9V')
+.constant('GOOGLE_MAPS_API_KEY', 'AIzaSyCXkSmzsS_y_F_YpX7QSG68YhVvZ9PRfFY')
 .constant('_', require('lodash'))
 .constant('s', require('underscore.string'))
 .run(function($http, $rootScope, $state, APP_ID, JS_KEY, User, $timeout, $ionicScrollDelegate) {

@@ -1,23 +1,27 @@
 angular.module('manager.controllers')
 
-.controller('ImportCtrl', function($scope, $timeout, Upload, UtilsService, VenueService, $ionicLoading, $ionicScrollDelegate, CategoriesService, $ionicModal){
+.controller('ImportCtrl', function($scope, $timeout, Upload, UtilsService, VenueService, $ionicLoading, $ionicScrollDelegate, CategoriesService, $ionicModal, GOOGLE_MAPS_API_KEY){
     var Papa = require('papaparse');
     var _ = require('lodash');
     var slugify = require('underscore.string/slugify');
+    var cleanDiacritics = require('underscore.string/cleanDiacritics');
     var writefile = require('writefile');
     var fileSave = require('file-save');
     var fs = require('fs');
     var mkdirp = require('mkdirp');
     var shell = require('electron').shell;
     var notifier = require('node-notifier');
+    var gm = require('googlemaps');
+    var gmAPI = new gm({key: GOOGLE_MAPS_API_KEY});
 
     $scope.log = '';
     $scope.records = null;
     $scope.errors = null;
-    $scope.loading = false;
+    $scope.loading = true;
     $scope.dirName = '';
     $scope.documents = {};
     $scope.categories = [];
+    $scope.data = {currentPage: $scope.currentPage};
     $scope.$watch('files', function () {
         if($scope.files && $scope.files.length){
             upload($scope.files);
@@ -46,53 +50,56 @@ angular.module('manager.controllers')
                     if(results){
                         if(results.data){
                             $scope.log = 'Parsed ' + results.data.length + ' records from file[' + file.name + ']';
+                            var docs = {};
 
-                            results.data
+                            _.sortBy(results.data, function(v){
+                                    return slugify(v.activity_description).toLowerCase();
+                                })
                                 .forEach(function(v, i){
                                     var doc = slugify(v.activity_description).toLowerCase();
-                                    var venue = VenueService.parse(v, {fromBatch: true});
+                                    var venue = VenueService.parse(v, {from_batch: true});
 
-                                    if($scope.documents[doc]){
-                                        $scope.documents[doc].push(venue);
+                                    if(docs[doc]){
+                                        docs[doc].push(venue);
                                     }else{
-                                        $scope.documents[doc] = [venue];
+                                        docs[doc] = [venue];
                                     }
                                 });
 
-                            if(!_.isEmpty($scope.documents)){
-                                var size = _.size($scope.documents);
-                                var keys = _.keys($scope.documents);
+                            if(!_.isEmpty(docs)){
+                                console.log('docs not empty', docs);
+                                var size = _.size(docs);
+                                var keys = _.keys(docs);
 
-                                var index = _.chunk(keys, 50);
+                                var index = _.chunk(keys, 25);
                                 var chunks = index.map(function(indexes, i){
                                     var d = {};
 
                                     indexes.forEach(function(indx, i){
-                                        d[indx] = $scope.documents[indx];
+                                        d[indx] = docs[indx];
                                     });
 
                                     return d;
                                 });
 
-                                $scope.chunks = chunks;
-
-                                //Make smaller items in every chunk
-                                $scope.chunks = $scope.chunks.map(function(c){
-                                    if(c.length > 500){
-                                        console.log('chunk is too big');
-                                        return _.chunks(c, 500).splice();
-                                    }else{
-                                        return c;
-                                    }
+                                $timeout(function(){
+                                    $scope.$apply(function(){
+                                        $scope.chunks = chunks;
+                                        $scope.pages = chunks.length;
+                                        $scope.currentPage = 0;
+                                        $scope.pagesArray = _.range($scope.pages);
+                                    });
                                 });
-                                //$scope.records = $scope.chunks[0];
-                                $scope.pages = chunks.length;
-                                $scope.currentPage = 0;
                             }else{
-                                $scope.chunks = [];
-                                $scope.pages = 0;
-                                $scope.currentPage = 0;
-                                $scope.error = 'No valid data found';
+                                $timeout(function(){
+                                    $scope.$apply(function(){
+                                        $scope.chunks = [];
+                                        $scope.pages = 0;
+                                        $scope.currentPage = 0;
+                                        $scope.error = 'No valid data found';
+                                        $scope.pagesArray = [];
+                                    });
+                                });
                             }
 
                             $ionicScrollDelegate.$getByHandle('importScrollHandle').resize();
@@ -132,15 +139,83 @@ angular.module('manager.controllers')
         }
     };
 
-    $scope.next = function(){
+    $scope.uploadSingle = function(files){
+        if (files && files.length) {
+            $timeout(function(){
+                $scope.$apply(function(){
+                    $scope.loading = true;
+                });
+            });
+
+            var file = files[0];
+
+            Papa.parse(file, {
+                //worker: true,
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true,
+                complete: function(results){
+                    if(results){
+                        if(results.data){
+                            $scope.log = 'Parsed ' + results.data.length + ' records from file[' + file.name + ']';
+
+                            $timeout(function(){
+                                $scope.$apply(function(){
+                                    $scope.importByCategoryRecords =
+                                                    results
+                                                        .data
+                                                        .map(function(v, i){
+                                                            var venue = VenueService.parse(v, {from_batch: true});
+
+                                                            return venue;
+                                                        });
+                                    $scope.loading = false;
+                                });
+                            });
+                        }
+
+                        if(results.errors && results.errors.length){
+                            $scope.errors = results.errors;
+                            $scope.error = 'Some errors found';
+                            $scope.records = null;
+                            $scope.documents = {};
+
+                            $timeout(function(){
+                                $scope.$apply(function(){
+                                    $scope.loading = false;
+                                });
+                            });
+                        }
+                    }else{
+                        $scope.error = 'Nothing to parse, please check your CSV file';
+                    }
+                }
+            });
+        }
+    };
+
+    $scope.cancelImpotByCategory = function(){
         $timeout(function(){
             $scope.$apply(function(){
-                $scope.loading = true;
-                $ionicScrollDelegate.$getByHandle('importScrollHandle').resize();
-                $ionicScrollDelegate.$getByHandle('importScrollHandle').scrollTop(false);
+                $scope.importByCategoryRecords = null;
             });
         });
+    };
 
+    $scope.cancelBatchImport = function(){
+        $timeout(function(){
+            $scope.$apply(function(){
+                $scope.chunks = [];
+                $scope.pages = null;
+                $scope.currentPage = null;
+                $scope.pagesArray = [];
+                $scope.documents = {};
+                $scope.records = null;
+            });
+        });
+    }
+
+    $scope.next = function(){
         if($scope.currentPage < $scope.pages){
             $timeout(function(){
                 $scope.$apply(function(){
@@ -151,14 +226,6 @@ angular.module('manager.controllers')
     };
 
     $scope.prev = function(){
-        $timeout(function(){
-            $scope.$apply(function(){
-                $scope.loading = true;
-                $ionicScrollDelegate.$getByHandle('importScrollHandle').resize();
-                $ionicScrollDelegate.$getByHandle('importScrollHandle').scrollTop(false);
-            });
-        });
-
         if($scope.currentPage > 0){
             $timeout(function(){
                 $scope.$apply(function(){
@@ -168,18 +235,104 @@ angular.module('manager.controllers')
         }
     };
 
-    $scope.$watch('currentPage', function(c, p){
+    $scope.goTo = function(index){
         $timeout(function(){
             $scope.$apply(function(){
-                $scope.records = $scope.chunks[c];
-                $scope.loading = false;
+                $scope.currentPage = index*1;
+            });
+        });
+    };
+
+    $scope.runFilter = function(i, altKeywords){
+        console.log(i, 'index', $scope.records[i]);
+
+        var records = angular.copy($scope.records[i]);
+        var docs = {};
+        var recordCount = 0;
+        var indexes = [];
+
+        altKeywords = UtilsService.strings.keywordize(altKeywords);
+        //altKeywords = _.uniq(altKeywords);
+
+        if(!_.isEmpty(altKeywords)){
+            records.forEach(function(r, k){
+                try{
+                    var index;
+                    var keywords = UtilsService.strings.sanitize(r.keywords);
+
+                    if(altKeywords.length === 1 && keywords.indexOf(altKeywords[0])!== -1){
+                        index = altKeywords;
+                    }else{
+                        index = _.intersection(keywords, altKeywords);
+                    }
+
+                    if(_.isEmpty(index)){
+                        return;
+                    }
+
+                    if(index.length > 1){
+                        index = index.join('-');
+                    }else{
+                        index = index[0];
+                    }
+
+                    console.log('resulting index', index);
+                    console.log('\n\n-------------------', k, r);
+
+                    records[k] = null;
+
+                    if($scope.records[index]){
+                        $scope.records[index].push(r);
+                    }else{
+                        $scope.records[index] = [r];
+                    }
+
+                    recordCount++;
+                }catch(e){
+                    console.log('error', e);
+                }
+            });
+
+            $timeout(function(){
+                $scope.$apply(function(){
+                    $scope.records[i] = records.filter(function(r){
+                        if(!_.isEmpty(r)){
+                            return r;
+                        }
+                    });
+                    //records._additionalKeywords = '';
+                    $ionicScrollDelegate.$getByHandle('importScrollHandle').resize();
+
+                    var myNotification = new Notification('Filter Performed', {
+                        body: recordCount + ' records have been extracted'
+                    });
+                });
+            }, 1000);
+        }else{
+            alert('No keywords found');
+        }
+    };
+
+    $scope.$watch('currentPage', function(c, p){
+        console.log('current page', c, p);
+        $timeout(function(){
+            $scope.$apply(function(){
+                $scope.loading = true;
+                $ionicScrollDelegate.$getByHandle('importScrollHandle').resize();
+                $ionicScrollDelegate.$getByHandle('importScrollHandle').scrollTop(false);
+
+                $timeout(function(){
+                    $scope.$apply(function(){
+                        $scope.records = $scope.chunks[c];
+                        console.log($scope.records, 'records');
+                        $scope.loading = false;
+                        $ionicScrollDelegate.$getByHandle('importScrollHandle').resize();
+                        $ionicScrollDelegate.$getByHandle('importScrollHandle').scrollTop(false);
+                    });
+                });
             });
         });
     });
-
-    $scope.parseSection = function(c){
-        console.log(c, 'c');
-    };
 
     $scope.save = function(record, index){
         if(record.category){
@@ -209,9 +362,9 @@ angular.module('manager.controllers')
         }
     }
 
-    $scope.detail = function(records){
-        $scope.previewRecords = records;
-        $scope.previewCategoryName = 'Category Preview';
+    $scope.detail = function(id){
+        $scope.previewRecords = $scope.records[id];
+        $scope.previewCategoryName = 'Category Preview: ' + id;
 
         if(!$scope.previewModal){
             $ionicModal.fromTemplateUrl('templates/import-detail-modal.html', {
@@ -226,50 +379,31 @@ angular.module('manager.controllers')
         }
     };
 
-    $scope.parse = function(){
-        $timeout(function(){
-            $scope.$apply(function(){
-                $scope.loading = true;
-            });
-        });
-
-        mkdirp('/tmp/jound-manager-data/' + $scope.dirName, function(err) {
-
-            // path was created unless there was error
-            if(err){
-                var myNotification = new Notification('Error', {
-                    body: err
-                });
-            }else{
-                _.each($scope.documents, function(docs, name){
-                    var data = Papa.unparse(docs);
-                    var fileName = '/tmp/jound-manager-data/' + $scope.dirName + '/' + name + '.csv';
-
-                    fs.writeFile(fileName, data, function(err) {
-                        if(err) {
-                            return console.log(err);
-                        }
-
-                    });
-                });
-
-                var myNotification = new Notification('Complete', {
-                    body: 'All files have been saved'
-                });
-
-                shell.openItem('/tmp/jound-manager-data/' + $scope.dirName);
-
-                $timeout(function(){
-                    $scope.$apply(function(){
-                        $scope.records = null;
-                        $scope.loading = false;
-                        $scope.documents = {};
-                    });
-                });
-            }
-
-        });
+    $scope.hideDetailModal = function(){
+        if($scope.previewModal){
+            $scope.previewModal.hide();
+        }
     }
+
+    $scope.showLocation = function(lat, lng, name, record){
+        var params = {
+            center: lat + ',' + lng,
+            zoom: 15,
+            size: '650x600',
+            maptype: 'roadmap',
+            markers: [
+                {
+                    location: lat + ',' + lng,
+                    label   : 'Venue',
+                    color   : 'orange',
+                    shadow  : true
+                }
+            ]
+        };
+        var w = window.open(gmAPI.staticMap(params), "Map Preview");
+
+        w.focus();
+    };
 
     $scope.$on('$ionicView.enter', function(){
         $timeout(function(){

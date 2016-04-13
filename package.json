@@ -28,6 +28,8 @@
   "dependencies": {
     "electron-window": "^0.6.2",
     "file-save": "^0.2.0",
+    "google-static-map": "0.0.2",
+    "googlemaps": "^1.2.0",
     "lodash": "^3",
     "mkdirp": "^0.5.1",
     "node-notifier": "^4.5.0",

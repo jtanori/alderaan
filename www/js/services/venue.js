@@ -6,12 +6,30 @@ angular.module('manager.services')
     var _ = require('lodash');
     var s = require('underscore.string');
 
+    var toCoords = function(v){
+        if(_.isNumber(v)){
+            return v;
+        }
+        if(_.isString(v)){
+            return v.replace(",", '.')*1;
+        }
+
+        return null;
+    };
+
     var parseVenue = function(venue, attributes){
         //Check if the thing is valid at all, no name, no position, no fucking record.
-        if(_.isNumber(venue.latitud) && _.isNumber(venue.longitud)){
-            //Mea culpa, didn't fix all headers on the CSV files
-            if(venue.latitud){venue.latitude = parseFloat(venue.latitud, 10); delete venue.latitud;}//Fix spanish name for lat/lng
-            if(venue.longitud){venue.longitude = parseFloat(venue.longitud, 10); delete venue.longitud;}
+        if(venue.latitud && venue.longitud){
+            venue.latitude = toCoords(venue.latitud);
+            venue.longitude = toCoords(venue.longitud);
+            delete venue.latitud;
+            delete venue.longitud;
+        }else if(_.isString(venue.latitude) || _.isString(venue.longitude)){
+            venue.latitude = toCoords(venue.latitude);
+            venue.longitude = toCoords(venue.longitude);
+        }
+
+        if(_.isNumber(venue.latitude) && _.isNumber(venue.longitude)){
             if(venue.id){venue.deneueId = venue.id+""; delete venue.id;}//Remove source id (legacy)
             if(_.isNumber(venue.postal_code)){venue.postal_code = venue.postal_code+"";}
             if(_.isNumber(venue.phone_number)){venue.phone_number = venue.phone_number+"";}
@@ -48,29 +66,54 @@ angular.module('manager.services')
             venue.municipality = s(venue.municipality).titleize().value();
             venue.federal_entity = s(venue.federal_entity).titleize().value();
 
+            //Cleanup after
+            _.each(venue, function(v, k){
+                if(_.isString(v)){
+                    venue[k] = v.trim();
+                }
+
+                if(_.isNumber(v)){
+                    return;
+                }
+
+                if(_.isEmpty(v)){
+                    delete venue[k];
+                }
+            });
+
+            venue.full_address = '';
+
+            if(!_.isEmpty(venue.road_type)){
+                venue.full_address = venue.road_type + ' ' + venue.road_name;
+
+                if(!_.isEmpty(venue.road_type_1)){
+                    venue.full_address += ' y ' + venue.road_type_1 + ' ' + venue.road_name_1;
+                }
+                if(!_.isEmpty(venue.road_type_2)){
+                    venue.full_address += ' entre ' + venue.road_type_2 + ' ' + venue.road_name_2;
+                }
+                if(!_.isEmpty(venue.road_type_3)){
+                    venue.full_address += ' y  ' + venue.road_type_3 + ' ' + venue.road_name_3;
+                }
+            }
+
+            if(_.isEmpty(venue.keywords)){
+                venue.keywords = [];
+            }else if(_.isString(venue.keywords)){
+                venue.keywords = UtilsService.strings.keywordize(venue.keywords);
+            }
+
             //Publish by default
             venue.online = true;
-            //Set category object
-            //venue.category = category;
-
-            //Save historycal data
-            //var user = new Parse.User();
-            //user.id = sess.user.objectId;
-
-            //venue.createdBy = user;
             //Add name keywords
-            venue.keywords = venue.name.split(" ") + ',' + venue.activity_description.split(' ');
-            venue.keywords = _.chain(venue.keywords.split(',')).compact().invoke('toLowerCase').invoke('trim').concat(UtilsService.strings.keywordize(venue.name, ' ')).uniq().value();
-            venue.keywords = UtilsService.strings.sanitize(venue.keywords);
+            var keywords = venue.name.split(" ") + ',' + venue.activity_description.split(' ');
+            keywords = _.chain(keywords.split(',')).compact().invoke('toLowerCase').invoke('trim').concat(UtilsService.strings.keywordize(venue.name, ' ')).uniq().value();
+            keywords = UtilsService.strings.sanitize(keywords);
+
+            venue.keywords = venue.keywords.concat(keywords);
+            venue.keywords = _.uniq(venue.keywords);
             //Extend with custom attributes
             venue = _.extend(venue, attributes);
-            //venue.position = new Parse.GeoPoint({latitude: venue.latitude, longitude: venue.longitude});
-            //venue.updateHistory = [{op: 'created', timestamp: (new Date())*1, by: sess.user.objectId}];
-            //Add name to object object for latter save
-            //venueObject = new LocationModel(venue);
-            //venueObject.setACL(ACL);
-            //Push to venues object
-            //objects.push(venueObject);
             return venue;
         } else {
             return null;

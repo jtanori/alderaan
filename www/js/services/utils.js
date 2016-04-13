@@ -62,15 +62,16 @@ angular.module('manager.services')
     return {
     	strings: {
     		good: good,
-    		keywordize: function(s, d){
+    		keywordize: function(words, d){
     			var results;
     			try {
     				d = d ? d : ',';
-    				results = s.split(d);
-                    var nodiactritics = results.map(function(str){return s.cleanDiacritics(str);}) || [];
-                    results = results.concat(nodiactritics);
+    				results = words.split(d);
     				results = _.chain(results);
-    				results = results.invoke('trim').invoke('toLowerCase').uniq().map(good).compact().value();
+    				results = results.invoke('trim').invoke('toLowerCase').uniq().map(good).compact();
+                    var nodiactritics = results.map(function(str){return s.cleanDiacritics(str);}).value() || [];
+
+                    results = results.concat(nodiactritics).uniq().value();
     			}catch(e){
     				results = [];
     			}finally{
@@ -81,9 +82,10 @@ angular.module('manager.services')
     			var results;
     			try{
     				results = _.chain(words);
-                    var nodiactritics = results.map(function(str){return s.cleanDiacritics(str);}) || [];
-                    results = results.concat(nodiactritics);
-    				results = results.invoke('trim').invoke('toLowerCase').uniq().map(good).compact().value();
+    				results = results.invoke('trim').invoke('toLowerCase').uniq().map(good).compact();
+                    var nodiactritics = results.map(function(str){return s.cleanDiacritics(str);}).value() || [];
+
+                    results = results.concat(nodiactritics).uniq().value();
     			}catch(e){
     				results = [];
     			}finally{

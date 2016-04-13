@@ -32,13 +32,22 @@
                         </label>
                         <label class="item item-stacked-label" ng-if="category">
                             <span class="input-label">Keywords</span>
-                            <tags-input ng-model="category.keywords" ng-model="category.keywords" required></tags-input>
+                            <tags-input ng-model="category.keywords" required></tags-input>
                             <p>Type a keyword and hit enter to add it</p>
                         </label>
                         <div class="item item-toggle" ng-if="category">
                             Active
                             <label class="toggle toggle-assertive">
                                 <input type="checkbox" ng-model="category.active">
+                                <div class="track">
+                                    <div class="handle"></div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="item item-toggle" ng-if="category">
+                            Primary
+                            <label class="toggle toggle-assertive">
+                                <input type="checkbox" ng-model="category.primary">
                                 <div class="track">
                                     <div class="handle"></div>
                                 </div>

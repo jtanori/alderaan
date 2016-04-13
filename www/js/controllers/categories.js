@@ -1,13 +1,35 @@
 angular.module('manager.controllers')
 
-.controller('CategoriesCtrl', function($scope, $timeout, $ionicPlatform, CategoriesService, $ionicLoading){
+.controller('CategoriesCtrl', function($scope, $rootScope, $timeout, $ionicPlatform, CategoriesService, $ionicLoading, $ionicModal, $ionicScrollDelegate, UtilsService){
+
+    var _ = require('lodash');
+
     $scope.categories = [];
     $scope.error = null;
+    $scope.categoryMaster = {};
+    $scope.slugify = require('underscore.string').slugify;
+    $scope.titleize = require('underscore.string').titleize;
+    $scope.data = {};
+
+    $rootScope.$on('category:removed', function(e, id){
+        $timeout(function(){
+            $scope.$apply(function(){
+                var index = _.findIndex($scope.categories, function(c){
+                    if(c.id === id || c.objectId === id){
+                        return c;
+                    }
+                });
+
+                $scope.categories.splice(index, 1);
+            });
+        })
+    });
 
     $scope.refresh = function(force){
         $timeout(function(){
             $scope.$apply(function(){
                 $scope.loading = true;
+                $scope.corrupted = null;
             });
         });
 
@@ -15,7 +37,16 @@ angular.module('manager.controllers')
             .get(force || false)
             .then(function(results){
                 if(results){
-                    $scope.categories = results;
+                    $timeout(function(){
+                        $scope.$apply(function(){
+                            $scope.categories = results;
+                            $scope.corrupted = results.filter(function(c){
+                                if(_.isEmpty(c.slug)){
+                                    return c;
+                                }
+                            }).length;
+                        });
+                    });
                 }else{
                     $scope.error = 'No categories found, please contact technical service.';
                 }
@@ -26,19 +57,130 @@ angular.module('manager.controllers')
                 $timeout(function(){
                     $scope.$apply(function(){
                         $scope.loading = false;
+                        $ionicScrollDelegate.$getByHandle('categories-scroll').resize();
                     });
                 });
             });
     };
 
-    $scope.$on('$ionicView.enter', function(){
-        if(!$scope.categories.length){
-            $scope.refresh();
+    $scope.addCategory = function(){
+        $scope.category = angular.copy($scope.categoryMaster);
+
+        if(!$scope.newCategoryModal){
+            $ionicModal.fromTemplateUrl('templates/new-category-modal.html', {
+                scope: $scope,
+                animation: 'slide-in-up'
+            }).then(function(modal) {
+                $scope.newCategoryModal = modal;
+                $scope.newCategoryModal.show();
+            });
+        }else{
+            $scope.newCategoryModal.show();
         }
+    };
+
+    $scope.saveCategory = function(){
+        var data = angular.copy($scope.category);
+
+        if(_.isEmpty(data.displayName)){
+            alert('Please provide a display name for this category');
+        }else if(_.isEmpty(data.name)){
+            alert('Please provide a name for this category');
+        }else if(_.isEmpty(data.slug)){
+            alert('Please provide a slug for this category');
+        }else if(_.isEmpty(data.pluralized)){
+            alert('Please provide a pluralized name for this category');
+        }else if(_.isEmpty(data.keywords)){
+            alert('Please enter keywords');
+        } else {
+            data.keywords = data.keywords.map(function(k){return k.text;});
+
+            $timeout(function(){
+                $scope.$apply(function(){
+                    $scope.saving = true;
+                    $ionicLoading.show({template: 'Saving category...'});
+                });
+            });
+
+            CategoriesService
+                .add(data)
+                .then(function(c){
+                    if(!_.isEmpty(c)){
+                        alert('Category Saved');
+                        $scope.refresh();
+                        hideCategoryModal();
+                        $ionicScrollDelegate.$getByHandle('categories-scroll').resize();
+                        $ionicScrollDelegate.$getByHandle('categories-scroll').scrollBottom(false);
+                    }else{
+                        alert('An error has occurred while saving the category, please try again.');
+                    }
+                }, function(e){
+                    $scope.categoryError = e.message;
+                    alert(e.message);
+                })
+                .finally(function(){
+                    $timeout(function(){
+                        $scope.$apply(function(){
+                            $scope.saving = false;
+                            $ionicLoading.hide();
+                        });
+                    });
+                })
+        }
+    };
+
+    $scope.cancelNewCategory = function(){
+        hideCategoryModal();
+    }
+
+    $scope.filterCategory = function(){
+        var keywords = UtilsService.strings.keywordize($scope.data.q);
+        var q = $scope.data.q;
+
+        if(keywords.length){
+            $scope.categories.forEach(function(c){
+                var hide = true;
+
+                if(_.intersection(c.keywords, keywords).length){
+                    hide = false;
+                }else{
+                    hide = true;
+                    if(c.name && c.name.indexOf(q) >= 0){
+                        hide = false;
+                    }if(c.displayName && c.displayName.indexOf(q) >= 0){
+                        hide = false;
+                    }if(c.pluralized && c.pluralized.indexOf(q) >= 0){
+                        hide = false;
+                    }else if(c.slug && c.slug.indexOf(q) >= 0){
+                        hide = false
+                    }
+                }
+
+                c.hidden = hide;
+            });
+        }else{
+            $scope.categories.forEach(function(c){
+                c.hidden = false;
+            });
+        }
+
+        $ionicScrollDelegate.$getByHandle('categories-scroll').resize();
+        $ionicScrollDelegate.$getByHandle('categories-scroll').scrollTop(false);
+    }
+
+    var hideCategoryModal = function(){
+        if($scope.newCategoryModal){
+            $scope.category = null;
+            $scope.newCategoryModal.hide();
+        }
+    };
+
+    $scope.$on('$ionicView.enter', function(){
+        $scope.refresh();
     });
 })
 
-.controller('CategoryCtrl', function($scope, $timeout, $stateParams, CategoriesService, $ionicLoading, $ionicPopup, UtilsService, LANGS, $ionicScrollDelegate){
+.controller('CategoryCtrl', function($scope, $rootScope, $timeout, $state, $stateParams, CategoriesService, $ionicLoading, $ionicPopup, UtilsService, LANGS, $ionicScrollDelegate){
     var _ = require('lodash');
     var notifier = require('node-notifier');
 
@@ -126,14 +268,30 @@ angular.module('manager.controllers')
     $scope.remove = function(){
         var confirmPopup = $ionicPopup.confirm({
             title: 'Delete',
-            template: 'Are you sure you want to delete this category?'
+            template: 'Are you sure you want to delete this category, there is no undo?'
         });
 
         confirmPopup.then(function(res) {
+            $ionicLoading.show({template: 'Deleting...'});
+
             if(res) {
-                console.log('You are sure');
-            } else {
-                console.log('You are not sure');
+                CategoriesService
+                    .remove($scope.category.id)
+                    .then(function(removed){
+                        if(removed){
+                            alert('Category has been removed');
+                            $rootScope.$broadcast('category:removed', $scope.category.id);
+                            $scope.category = null;
+                            $state.go('app.categories');
+                        }else{
+                            alert(removed);
+                        }
+                    }, function(e){
+                        alert(e.message);
+                    })
+                    .finally(function(){
+                        $ionicLoading.hide();
+                    });
             }
         });
     };

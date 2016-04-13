@@ -1,14 +1,14 @@
 <ion-modal-view>
     <ion-header-bar class="bar-stable">
-        <h1 class="title">{{previewCategoryName}}</h1>
-        <a class="button button-icon ion-close" ng-click="hideDetailModal()"></a>
+        <h1 class="title">Import</h1>
     </ion-header-bar>
-    <ion-content class="padding">
+    <ion-content>
         <table id="import-table" class="zebra bordered">
             <thead>
                 <tr>
                     <th>ID</id>
                     <th>Name</th>
+                    <th>Address</th>
                     <th>Keywords</th>
                     <th>Position</th>
                 </tr>
@@ -17,8 +17,9 @@
                 <tr ng-repeat="record in previewRecords">
                     <td>{{$index}}</td>
                     <td>{{record.name}}</td>
+                    <td>{{record.full_address}}</td>
                     <td><p>{{record.keywords.join(', ')}}<p></td>
-                    <td><button type="button" class="button button-small button-assertive" ng-click="showLocation(record.latitude, record.longitude, record.name, record)"><i class="icon ion-location"></i></button></td>
+                    <td><i class="icon ion-location" ng-click="showLocation(record.latitud, record.longitud, record.name)"></i></td>
                 </tr>
             </tbody>
         </table>

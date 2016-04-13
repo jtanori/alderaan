@@ -3,14 +3,27 @@
         <a class="button button-icon button-clear ion-refresh" ng-disabled="loading" ng-click="refresh(true)"></a>
         <a class="button button-icon button-clear ion-plus-round" ng-disabled="loading" ng-click="addCategory()"></a>
     </ion-nav-buttons>
-    <ion-content>
+    <form class="bar bar-subheader item-input-inset" ng-if="!loading">
+        <label class="item-input-wrapper">
+            <i class="icon ion-ios-search placeholder-icon"></i>
+            <input type="search" placeholder="Search" ng-model="data.q" ng-change="filterCategory(data.q)" ng-model-options="{ debounce: 500 }">
+        </label>
+        <button class="button button-clear" type="submit">
+            Search
+        </button>
+    </form>
+    <ion-content has-subheader="true" class="has-subheader" ng-class="{'has-footer': corrupted}" delegate-handle="categories-scroll">
         <div class="text-center padding" ng-if="loading"><ion-spinner></ion-spinner><p>Loading Categories...</p></div>
         <ion-list ng-if="!loading">
-            <ion-item ng-repeat="category in categories" href="#/categories/{{category.id}}" class="">
-                <h2>{{category.displayName}}</h2>
+            <ion-item ng-repeat="category in categories" href="#/categories/{{category.id || category.objectId}}" ng-if="!category.hidden">
+                <h2>{{$index+1}}) {{category.displayName}} / {{category.slug}} <i class="icon ion-ios-pulse-strong" ng-if="category.active"></i> <i class="icon ion-key" ng-if="category.primary"></i></h2>
+                <p ng-if="!category.slug"><span class="assertive">Please fix the slug</span></p>
                 <p>Keywords: {{category.keywords}}</p>
                 <p>Last updated: {{category.updatedAt}}</p>
             </ion-item>
         </ion-list>
     </ion-content>
+    <ion-footer-bar class="bar-assertive" ng-if="corrupted">
+        <h1 class="title">{{corrupted}} conflicting records, please fix.</h1>
+    </ion-footer-bar>
 </ion-view>

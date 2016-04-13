@@ -1,0 +1,65 @@
+<ion-modal-view>
+    <ion-header-bar class="bar-stable">
+        <h1 class="title">Add New Category</h1>
+    </ion-header-bar>
+    <ion-content>
+        <form class="card" ng-submit="saveCategory()" novalidate>
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">Display Name</span>
+                <input type="text" value="{{category.displayName}}" ng-model="category.displayName" required ng-change="titleize(category.displayName)" ng-model-options="{updateOn: 'default', debounce: 1000}"/>
+            </label>
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">Name</span>
+                <input type="text" value="{{category.name}}" ng-model="category.name" required ng-change="titleize(category.name)" ng-model-options="{updateOn: 'default', debounce: 1000}"/>
+            </label>
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">Pluralized Name</span>
+                <input type="text" value="{{category.pluralized}}" ng-model="category.pluralized" required ng-change="titleize(category.pluralized)" ng-model-options="{updateOn: 'default', debounce: 1000}"/>
+            </label>
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">Slug</span>
+                <input type="text" value="{{category.slug}}" ng-model="category.slug" required ng-change="slugify(category.slug)" ng-model-options="{updateOn: 'default', debounce: 1000}"/>
+            </label>
+            <label class="item item-stacked-label">
+                <span class="input-label">Keywords</span>
+                <tags-input ng-model="category.keywords" required></tags-input>
+                <p>Type a keyword and hit enter to add it</p>
+            </label>
+            <div class="item item-toggle" ng-if="category">
+                Active
+                <label class="toggle toggle-assertive">
+                    <input type="checkbox" ng-model="category.active">
+                    <div class="track">
+                        <div class="handle"></div>
+                    </div>
+                </label>
+            </div>
+            <div class="item item-toggle" ng-if="category">
+                Primary
+                <label class="toggle toggle-assertive">
+                    <input type="checkbox" ng-model="category.primary">
+                    <div class="track">
+                        <div class="handle"></div>
+                    </div>
+                </label>
+            </div>
+            <div class="item">
+                <h2 class="assertive">* All fields are required</h2>
+            </div>
+            <div class="item text-center" ng-if="saving && category">
+                <ion-spinner></ion-spinner> Saving
+            </div>
+            <div class="item assertive" ng-if="error">
+                <h2>Error</h2>
+                <p>{{categoryError}}</p>
+            </div>
+        </form>
+    </ion-content>
+    <ion-footer-bar class="bar-stable">
+        <h1 class="title"></h1>
+        <div class="buttons" side="right">
+            <button type="button" class="button button-positive" ng-click="saveCategory()">Save</button>
+            <button type="button" class="button button-assertive button-clear" ng-click="cancelNewCategory()">Cancel</a>
+        </div>
+    </ion-footer-bar>
+</ion-modal-view>
