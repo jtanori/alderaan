@@ -1,0 +1,37 @@
+<ion-view view-title="Verify Account">
+    <ion-pane>
+        <form ng-submit="submit()" id="verify" name="verifyForm">
+            <div class="card">
+                <label class="item text-center">
+                    <h2>Verify Account</h2>
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">Email Address</span>
+                    <input type="text" ng-model="user.username">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">Phone Number</span>
+                    <input type="tel" ng-model="user.phone">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">Verification Code</span>
+                    <input type="number" ng-model="user.code">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">New Password</span>
+                    <input type="password" ng-model="user.password">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">Confirm New Password</span>
+                    <input type="password" ng-model="user.passwordConfirmation">
+                </label>
+                <label class="item">
+                    <button class="button button-block button-positive" type="submit" ng-disabled="verifyForm.$invalid || user.password !== user.passwordConfirmation">Verify</button>
+                </label>
+                <a class="text-center item positive" href="#/login">
+                    Login instead
+                </a>
+            </div>
+        </form>
+    </ion-pane>
+</ion-view>

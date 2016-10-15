@@ -27,29 +27,13 @@ angular.module('manager.services')
                 .post(API_URL + '/manager/login', {username:username, password: password})
                 .then(function(c){
                     if(!_.isEmpty(c)){
-                        $http.defaults.headers.common['X-Parse-User-Token'] = c.data.user.sessionToken;
+                        $http.defaults.headers.common['X-Parse-Session-Token'] = c.data.user.sessionToken;
                         defer.resolve(c.data);
                     }else{
                         defer.reject({message: 'Invalid user', code: 403});
                     }
                 }, function(e){
-                    if(!_.isEmpty(e) && !_.isEmpty(e.data)){
-                        defer.reject({message: e.data.message, code: e.status});
-                    }else{
-                        defer.reject({message: 'Unknown error', code: e.status});
-                    }
-                });
-
-            return defer.promise;
-        },
-        logOut: function(){
-            var defer = $q.defer();
-
-            $http
-                .post(API_URL + '/manager/logout')
-                .then(function(c){
-                    defer.resolve(c);
-                }, function(e){
+                  console.log(e, 'error');
                     if(!_.isEmpty(e) && !_.isEmpty(e.data)){
                         defer.reject({message: e.data.message, code: e.status});
                     }else{

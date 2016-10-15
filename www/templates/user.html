@@ -6,7 +6,7 @@
         <div class="text-center padding" ng-if="loading"><ion-spinner></ion-spinner><p>Loading User Details...</p></div>
         <div ng-if="!loading && user">
             <div class="row">
-                <div class="col">
+                <div class="col-33">
                     <div class="list card">
                         <div class="item">
                             <h2>Profile</h2>
@@ -23,7 +23,7 @@
 
                     </div>
                 </div>
-                <div class="col">
+                <div class="col-33">
                     <div class="list card">
                         <div class="item">
                             <h2>Venues</h2>
@@ -45,7 +45,7 @@
                         </ion-item>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col-33">
                     <div class="list card">
                         <div class="item">
                             <h2>Roles</h2>
@@ -58,8 +58,13 @@
                         <ion-item ng-repeat="role in roles" class="item-button-right">
                             <h2>{{role.name}}</h2>
                             <p>Priority Level: {{role.priority}}</p>
-                            <button class="button" ng-click="" type="button">
+                            <button class="button" ng-click="revoke(role, $index)" type="button">
                                 Revoke
+                            </button>
+                        </ion-item>
+                        <ion-item class="item-button">
+                            <button class="button button-block button-small button-assertive" ng-click="suspend()" type="button">
+                                Suspend Account
                             </button>
                         </ion-item>
                     </div>

@@ -3,6 +3,11 @@ angular.module('manager.controllers')
 .controller('RolesCtrl', function(User, $scope, $state, $rootScope, RolesService, $timeout) {
     var _ = require('lodash');
 
+    if(_.isEmpty($rootScope.user)){
+        $state.go('app.home');
+        return;
+    }
+
     $scope.roles = [];
     $scope.error = null;
     $scope.loading = false;
@@ -43,8 +48,13 @@ angular.module('manager.controllers')
 
 })
 
-.controller('RoleCtrl', function($scope, $timeout, $stateParams, CategoriesService, $ionicLoading, RolesService, UsersService){
+.controller('RoleCtrl', function($scope, $rootScope, $timeout, $stateParams, CategoriesService, $ionicLoading, RolesService, UsersService){
     var _ = require('lodash');
+
+    if(_.isEmpty($rootScope.user)){
+        $state.go('app.home');
+        return;
+    }
 
     $scope.role = null;
     $scope.roles = null;
@@ -106,11 +116,10 @@ angular.module('manager.controllers')
     };
 
     $scope.searchUser = function(val){
-        console.log(val, 'val');
         $timeout(function(){
             $scope.$apply(function(){
                 var found = $scope.users.map(function(u){
-                    if(u.email.indexOf(val) !== -1){
+                    if(u.email && u.email.indexOf(val) !== -1){
                         u.hidden = false;
                     }else if(u.firstName && u.firstName.indexOf(val) !== -1){
                         u.hidden = false;

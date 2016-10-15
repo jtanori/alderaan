@@ -28,6 +28,38 @@ angular.module('manager.controllers')
     };
 })
 
+.controller('VerifyCtrl', function($rootScope, $scope, $state, $timeout, User, $ionicLoading, UsersService){
+    var _ = require('lodash');
+    const dialog = require('electron').remote.dialog;
+
+    if(!_.isEmpty($rootScope.user)){
+        $state.go('app.home');
+        return;
+    }
+
+    $scope.userMaster = {username: '', phone: '', code: '', password: '', passwordConfirmation: ''};
+    $scope.user = angular.copy($scope.userMaster);
+
+    $scope.submit = function(){
+        $ionicLoading.show({template: 'Verifying...'});
+
+        UsersService
+            .verify($scope.user.username, $scope.user.phone, $scope.user.code, $scope.user.password)
+            .then(function(){
+                $scope.user = angular.copy($scope.userMaster);
+                $state.go('login');
+            }, function(e){
+                $scope.user.code = '';
+                $scope.user.password = '';
+                $scope.user.passwordConfirmation = '';
+                dialog.showErrorBox('Error', e.message);
+            })
+            .finally(function(){
+                $ionicLoading.hide();
+            });
+    };
+})
+
 .controller('ForgotCtrl', function($rootScope, $scope, $state, $timeout, User, $ionicLoading){
     var _ = require('lodash');
 

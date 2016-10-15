@@ -1,8 +1,16 @@
 angular.module('manager.controllers')
 
-.controller('ImportCtrl', function($scope, $timeout, Upload, UtilsService, VenueService, $ionicLoading, $ionicScrollDelegate, CategoriesService, $ionicModal, GOOGLE_MAPS_API_KEY){
-    var Papa = require('papaparse');
+.controller('ImportCtrl', function($scope, $rootScope, $timeout, Upload, UtilsService, VenueService, $ionicLoading, $ionicScrollDelegate, CategoriesService, $ionicModal, GOOGLE_MAPS_API_KEY){
     var _ = require('lodash');
+
+    if(_.isEmpty($rootScope.user)){
+        $state.go('app.home');
+        return;
+    }
+
+    const dialog = require('electron').remote.dialog;
+
+    var Papa = require('papaparse');
     var slugify = require('underscore.string/slugify');
     var cleanDiacritics = require('underscore.string/cleanDiacritics');
     var writefile = require('writefile');
@@ -161,7 +169,7 @@ angular.module('manager.controllers')
 
                             $timeout(function(){
                                 $scope.$apply(function(){
-                                    $scope.importByCategoryRecords =
+                                    $scope.categoryImportModel.items =
                                                     results
                                                         .data
                                                         .map(function(v, i){
@@ -170,6 +178,9 @@ angular.module('manager.controllers')
                                                             return venue;
                                                         });
                                     $scope.loading = false;
+
+
+                                    console.log('category records', $scope.categoryImportModel);
                                 });
                             });
                         }
@@ -194,12 +205,51 @@ angular.module('manager.controllers')
         }
     };
 
+    $scope.categoryImportModelMaster = {
+        category: null,
+        items: null
+    };
+    $scope.categoryImportModel = angular.copy($scope.categoryImportModelMaster);
     $scope.cancelImpotByCategory = function(){
         $timeout(function(){
             $scope.$apply(function(){
-                $scope.importByCategoryRecords = null;
+                $scope.categoryImportModel = angular.copy($scope.categoryImportModelMaster);
             });
         });
+    };
+
+    $scope.saveRecordsForCategory = function(){
+        if($scope.categoryImportModel.category && $scope.categoryImportModel.items){
+            var data = angular.copy($scope.categoryImportModel);
+
+            data.items = data.items.map(function(v){
+                delete v.__parsed_extra;
+                delete v.$$hashKey;
+
+                return v;
+            });
+
+            $ionicLoading.show({template: '<ion-spinner></ion-spinner><br />Saving, this may take a moment'});
+
+            VenueService
+                .import(data.category, data.items)
+                .then(function(){
+                    dialog.showMessageBox({title: 'Success', buttons: ['Ok'], type: 'info', message: 'Venues have been imported'});
+                    //Clear results
+                    $timeout(function(){
+                        $scope.$apply(function(){
+                            $scope.categoryImportModel = angular.copy($scope.categoryImportModelMaster);
+                        });
+                    });
+                }, function(e){
+                    dialog.showErrorBox('Error', e.message);
+                })
+                .finally(function(){
+                    $ionicLoading.hide();
+                });
+        }else{
+            dialog.showErrorBox('Error', 'Please select a category and provide a valid CSV file for importing');
+        }
     };
 
     $scope.cancelBatchImport = function(){
@@ -276,9 +326,6 @@ angular.module('manager.controllers')
                         index = index[0];
                     }
 
-                    console.log('resulting index', index);
-                    console.log('\n\n-------------------', k, r);
-
                     records[k] = null;
 
                     if($scope.records[index]){
@@ -296,10 +343,13 @@ angular.module('manager.controllers')
             $timeout(function(){
                 $scope.$apply(function(){
                     $scope.records[i] = records.filter(function(r){
+                        console.log(r, 'r');
                         if(!_.isEmpty(r)){
                             return r;
                         }
                     });
+
+                    console.log($scope.records, 'records');
                     //records._additionalKeywords = '';
                     $ionicScrollDelegate.$getByHandle('importScrollHandle').resize();
 

@@ -32,8 +32,8 @@
                             <ion-item class="item-divider" ng-if="nonEnroledUsers.length">
                                 <h2>Non Enroled Users</h2>
                             </ion-item>
-                            <ion-item ng-repeat="user in nonEnroledUsers" ng-show="!user.hidden" class="item-button-right" href="#/users/{{user.objectId}}" >
-                                <h2><span ng-if="user.name">{{user.firstName}} {{user.lastName}} - </span> {{user.username}}</h2>
+                            <ion-item ng-repeat="user in nonEnroledUsers" ng-show="!user.hidden" class="item-button-right">
+                                <h2 ui-sref="app.user({id: user.objectId})"><span ng-if="user.name">{{user.firstName}} {{user.lastName}} - </span> {{user.username}}</h2>
                                 <p ng-if="user.username != user.email && user.email">({{user.email}})</p>
                                 <p>Created: {{user.createdAt}}, Last updated: {{user.updatedAt}}</p>
                                 <button class="button button-positive" ng-click="addUserToRole(user)" type="button">

@@ -5,17 +5,45 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
 
-angular.module('manager.controllers', []);
+angular.module('manager.controllers', ['ngMap']);
 angular.module('manager.services', []);
 angular.module('manager.directives', []);
 
-angular.module('manager', ['ionic', 'manager.controllers', 'manager.services', 'ngTagsInput', 'ngFileUpload'])
+window.app = angular.module('manager', ['ionic', 'manager.controllers', 'manager.services', 'ngTagsInput', 'ngFileUpload', 'ngMap', '720kb.datepicker'])
 
 .constant('LANGS', ['EN', 'FR', 'IT', 'PT', 'RU'])
-.constant('API_URL', 'http://devapi.jound.mx:5000')
-.constant('APP_ID', '24BXvqzE2yuQX5EVM9UPDIh1SyxBZnRMq7BBmo0Y')
-.constant('JS_KEY', 'dHaSGaXxD4ssx7GbPoXFNouJBG5r3pzPdCIPau9V')
-.constant('GOOGLE_MAPS_API_KEY', 'AIzaSyCXkSmzsS_y_F_YpX7QSG68YhVvZ9PRfFY')
+//.constant('API_URL', 'https://api.jound.mx')
+//.constant('API_URL', 'https://api-stage.jound.mx')
+.constant('API_URL', 'http://localhost:5001')
+.constant('APP_ID', 'jound')
+.constant('JS_KEY', 'jound-js')
+//.constant('APP_ID', '23495f01-e732-4fdf-bf13-ae569874ea2e')
+//.constant('JS_KEY', '5bfd0836-0ed7-4f6f-a44f-3cc6d0d0ce51')
+//.constant('APP_ID', '23495f01-e732-4fdf-bf13-ae569874ea2f')
+//.constant('JS_KEY', '5bfd0836-0ed7-4f6f-a44f-3cc6d0d0ce52')
+.constant('GOOGLE_MAPS_API_URL', 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDzZII1NdMzWZaRPfTFntVwaGt6p5hnesQ&libraries=places')
+.constant('GOOGLE_MAPS_API_KEY', 'AIzaSyDzZII1NdMzWZaRPfTFntVwaGt6p5hnesQ')
+.constant('DEFAULT_CENTER', { latitude: 23.634501, longitude: -102.552784 })
+.constant('DEFAULT_RADIUS', 1000)
+.constant('MINUTES', (function(){
+    var x = _.range(0, 60, 15);
+
+    return x.map(function(i){
+        return {id: i, name: i < 10 ? '0' + i : i};
+    });
+})())
+.constant('HOURS', (function(){
+    var x = _.range(0, 24);
+
+    return x.map(function(i){
+        return {id: i, name: i < 10 ? '0' + i : i};
+    });
+})())
+.constant('GEO_DEFAULT_SETTINGS', {
+    enableHighAccuracy: true,
+    timeout: 5000,
+    maximumAge: 0
+})
 .constant('_', require('lodash'))
 .constant('s', require('underscore.string'))
 .run(function($http, $rootScope, $state, APP_ID, JS_KEY, User, $timeout, $ionicScrollDelegate) {
@@ -28,7 +56,7 @@ angular.module('manager', ['ionic', 'manager.controllers', 'manager.services', '
     $rootScope.user = User.current();
 
     if($rootScope.user){
-        $http.defaults.headers.common['X-Parse-User-Token'] = $rootScope.user.get('sessionToken');
+        $http.defaults.headers.common['X-Parse-Session-Token'] = $rootScope.user.get('sessionToken');
     }
 
     $rootScope.$on('$stateChangeStart', function (event, next, nextParams, fromState) {
@@ -37,6 +65,7 @@ angular.module('manager', ['ionic', 'manager.controllers', 'manager.services', '
                 case 'forgot':
                 case 'resetPassword':
                 case 'login':
+                case 'verify':
                     break;
                 default:
                     event.preventDefault();
@@ -82,179 +111,10 @@ angular.module('manager', ['ionic', 'manager.controllers', 'manager.services', '
             $window.localStorage[key] = JSON.stringify(value);
         },
         getObject: function(key) {
-            console.log('get object', key);
             return JSON.parse($window.localStorage[key] || '{}');
         },
         removeItem: function(item){
             $window.localStorage.removeItem(item);
         }
     }
-}])
-
-.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider, $httpProvider) {
-    $stateProvider
-
-        .state('app', {
-            url: '',
-            abstract: true,
-            templateUrl: 'templates/menu.html',
-            controller: 'AppCtrl'
-        })
-
-        .state('app.home', {
-            url: '/home',
-            views: {
-                'menuContent': {
-                    templateUrl: 'templates/home.html'
-                }
-            }
-        })
-
-        .state('app.categories', {
-            url: '/categories',
-            views: {
-                'menuContent': {
-                    templateUrl: 'templates/categories.html',
-                    controller: 'CategoriesCtrl'
-                }
-            }
-        })
-
-        .state('app.category', {
-            url: '/categories/:id',
-            views: {
-                'menuContent': {
-                    templateUrl: 'templates/category.html',
-                    controller: 'CategoryCtrl'
-                }
-            }
-        })
-
-        .state('app.roles', {
-            url: '/roles',
-            views: {
-                'menuContent': {
-                    templateUrl: 'templates/roles.html',
-                    controller: 'RolesCtrl'
-                }
-            }
-        })
-
-        .state('app.role', {
-            url: '/roles/:id',
-            views: {
-                'menuContent': {
-                    templateUrl: 'templates/role.html',
-                    controller: 'RoleCtrl'
-                }
-            }
-        })
-
-        .state('app.users', {
-            url: '/users',
-            views: {
-                'menuContent': {
-                    templateUrl: 'templates/users.html',
-                    controller: 'UsersCtrl'
-                }
-            }
-        })
-
-        .state('app.user', {
-            url: '/users/:id',
-            views: {
-                'menuContent': {
-                    templateUrl: 'templates/user.html',
-                    controller: 'UserCtrl'
-                }
-            }
-        })
-
-        .state('app.import', {
-            url: '/import',
-            views: {
-                'menuContent': {
-                    templateUrl: 'templates/import.html',
-                    controller: 'ImportCtrl'
-                }
-            }
-        })
-
-        .state('app.geo', {
-            url: '/geo',
-            views: {
-                'menuContent': {
-                    templateUrl: 'templates/geo.html',
-                    controller: 'GeoCtrl'
-                }
-            }
-        })
-
-        .state('app.country', {
-            url: '/country/:id',
-            views: {
-                'menuContent': {
-                    templateUrl: 'templates/country.html',
-                    controller: 'CountryCtrl'
-                }
-            }
-        })
-
-        .state('app.state', {
-            url: '/country/:id/state/:stateId',
-            views: {
-                'menuContent': {
-                    templateUrl: 'templates/state.html',
-                    controller: 'StateCtrl'
-                }
-            }
-        })
-
-        .state('app.municipality', {
-            url: '/country/:id/state/:stateId/city/:municipalityId',
-            views: {
-                'menuContent': {
-                    templateUrl: 'templates/city.html',
-                    controller: 'CityCtrl'
-                }
-            }
-        })
-
-        .state('app.settling', {
-            url: '/country/:id/state/:stateId/city/:cityId/settling/:settlingId',
-            views: {
-                'menuContent': {
-                    templateUrl: 'templates/settling.html',
-                    controller: 'SettlingCtrl'
-                }
-            }
-        })
-
-        .state('login', {
-            url: '/login',
-            templateUrl: 'templates/login.html',
-            controller: 'LoginCtrl'
-        })
-
-        .state('forgot', {
-            url: '/forgot',
-            templateUrl: 'templates/forgot.html',
-            controller: 'ForgotCtrl'
-        })
-
-        .state('resetPassword', {
-            url: '/forgot/reset',
-            templateUrl: 'templates/reset.html',
-            controller: 'ResetCtrl'
-        });
-
-    $urlRouterProvider.otherwise(function ($injector, $location) {
-        var $state = $injector.get("$state");
-        $state.go("login");
-    });
-    // if none of the above states are matched, use this as the fallback
-    $urlRouterProvider.otherwise('/login');
-
-    $ionicConfigProvider.tabs.position('bottom');
-    $httpProvider.interceptors.push('responseObserver');
-});
+}]);

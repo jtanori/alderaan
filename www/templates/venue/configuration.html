@@ -1,0 +1,32 @@
+<ion-view view-title="Configuration" id="venue-home">
+    <ion-content>
+        <div id="import-drop" class="container row" style="background-image:url({{cover}})">
+            <button ng-if="model._banner" type="button" class="button button-small margin-a top right absolute positioned" ng-click="removeCover()"><i class="icon ion-close"></i> Remove Cover</button>
+            <div class="col col-center text-center">
+                <div class="button button-stable button-small"
+                    ngf-select="uploadCover($files)"
+                    ngf-multiple="false"
+                    ngf-pattern="'image/*'"
+                    ngf-accept="'image/*'" ngf-max-size="5MB" ngf-min-width="600"
+                    ngf-resize="{width: 600, height: 600}">Upload Cover Picture</div>
+                <button class="button button-light button-small" type="button">
+                    <i class="icon ion-link"></i> Use URL instead
+                </button>
+                <a href="{{$parent.venue.getCover().url}}" target="_blank">{{$parent.venue.getCover().url}}</a>
+            </div>
+        </div>
+        <label class="item item-input">
+            <span class="input-label">Name</span>
+            <input type="text" ng-model="$parent.venue.name" ng-change="model.name = $parent.venue.name">
+        </label>
+    </ion-content>
+    <ion-footer-bar class="bar-stable">
+        <div class="buttons" ng-if="canSave">
+            <button class="button button-assertive" ng-click="remove()"> Cancel</button>
+        </div>
+        <h1 class="title"></h1>
+        <div class="buttons">
+            <button class="button button-icon ion-upload icon-left" ng-click="save()" ng-disabled="!canSave"> Save</button>
+        </div>
+    </ion-footer-bar>
+</ion-view>

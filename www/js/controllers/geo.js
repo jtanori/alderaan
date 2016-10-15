@@ -1,6 +1,13 @@
 angular.module('manager.controllers')
 
-.controller('GeoCtrl', function($scope, $timeout, $ionicPlatform, GeoService, $ionicLoading){
+.controller('GeoCtrl', function($scope, $timeout, $rootScope, $ionicPlatform, GeoService, $ionicLoading){
+    var _ = require('lodash');
+
+    if(_.isEmpty($rootScope.user)){
+        $state.go('app.home');
+        return;
+    }
+
     $scope.countries = [];
     $scope.error = null;
 
@@ -38,8 +45,14 @@ angular.module('manager.controllers')
     });
 })
 
-.controller('CountryCtrl', function($scope, $timeout, $state, $stateParams, $ionicHistory, GeoService, $ionicLoading, $ionicPopup, UtilsService, LANGS, $ionicScrollDelegate, $ionicModal){
+.controller('CountryCtrl', function($scope, $rootScope, $timeout, $state, $stateParams, $ionicHistory, GeoService, $ionicLoading, $ionicPopup, UtilsService, LANGS, $ionicScrollDelegate, $ionicModal){
     var _ = require('lodash');
+
+    if(_.isEmpty($rootScope.user)){
+        $state.go('app.home');
+        return;
+    }
+
     var notifier = require('node-notifier');
     var Papa = require('papaparse');
 
@@ -224,8 +237,14 @@ angular.module('manager.controllers')
 
 })
 
-.controller('StateCtrl', function($scope, $timeout, $stateParams, $state, $ionicHistory, GeoService, $ionicLoading, $ionicPopup, UtilsService, LANGS, $ionicScrollDelegate, $ionicModal){
+.controller('StateCtrl', function($scope, $rootScope, $timeout, $stateParams, $state, $ionicHistory, GeoService, $ionicLoading, $ionicPopup, UtilsService, LANGS, $ionicScrollDelegate, $ionicModal){
     var _ = require('lodash');
+
+    if(_.isEmpty($rootScope.user)){
+        $state.go('app.home');
+        return;
+    }
+
     var notifier = require('node-notifier');
     var Papa = require('papaparse');
 

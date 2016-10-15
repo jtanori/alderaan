@@ -1,0 +1,68 @@
+<ion-modal-view>
+    <ion-header-bar class="bar-stable">
+        <h1 class="title">Add New Venue</h1>
+        <a class="button button-icon ion-close" ng-click="closeModal()"></a>
+    </ion-header-bar>
+    <ion-content class="has-footer">
+        <form ng-submit="invite()">
+            <div class="row">
+                <div class="col">
+                    <label class="item item-input">
+                        <span class="input-label">Name</span>
+                        <input type="text" ng-model="model.name">
+                    </label>
+                    <label class="item item-input">
+                        <span class="input-label">Activity Description</span>
+                        <input type="text" ng-model="model.activity_description">
+                    </label>
+                    <label class="item item-input">
+                        <span class="input-label">Email Address</span>
+                        <input type="email" ng-model="model.email">
+                    </label>
+                    <label class="item item-input">
+                        <span class="input-label">Phone Number</span>
+                        <input type="tel" ng-model="model.phone_number">
+                    </label>
+                </div>
+
+                <div class="col">
+                    <label class="item item-input">
+                        <span class="input-label">Name</span>
+                        <input type="text" ng-model="model.name">
+                    </label>
+                    <label class="item item-input">
+                        <span class="input-label">Activity Description</span>
+                        <input type="text" ng-model="model.activity_description">
+                    </label>
+                    <label class="item item-input">
+                        <span class="input-label">Email Address</span>
+                        <input type="email" ng-model="model.email">
+                    </label>
+                    <label class="item item-input">
+                        <span class="input-label">Phone Number</span>
+                        <input type="tel" ng-model="model.phone_number">
+                    </label>
+                </div>
+            </div>
+            <div data-tap-disabled="true">
+                <div map-lazy-load="https://maps.google.com/maps/api/js" map-lazy-load-params="{{googleMapsURL}}">
+                    <label class="item item-input" id="new-venue-search-box">
+                        <span class="input-label">Address</span>
+                        <input type="text" places-auto-complete ng-model="model.address" on-place-changed="placeChanged()" types="['geocode']">
+                    </label>
+                    <ng-map center="[{{map.center.latitude}}, {{map.center.longitude}}]" zoom="{{map.zoom}}" id="venue-new-map">
+                        <marker position="[{{marker.coords.latitude}}, {{marker.coords.longitude}}]" title="" draggable="true"></marker>
+                    </ng-map>
+                </div>
+
+            </div>
+        </form>
+    </ion-content>
+    <ion-footer-bar class="bar-stable">
+        <h1 class="title"></h1>
+        <div class="buttons" side="right">
+            <button type="button" class="button button-positive" ng-click="invite()">Save</button>
+            <button type="button" class="button button-assertive button-clear" ng-click="cancelInvite()">Cancel</a>
+        </div>
+    </ion-footer-bar>
+</ion-modal-view>

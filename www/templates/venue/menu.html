@@ -1,0 +1,41 @@
+<ion-side-menus enable-menu-with-back-views="false">
+    <ion-side-menu-content drag-content="false" delegate-handle="mainContentHandle">
+        <ion-nav-bar class="bar-stable nav-title-slide-ios7" animation="slide-left-right">
+        </ion-nav-bar>
+        <ion-nav-view name="menuContent" animation="slide-left-right"></ion-nav-view>
+    </ion-side-menu-content>
+
+    <ion-side-menu side="left" expose-aside-when="large">
+        <ion-header-bar class="bar-stable">
+            <h1 class="title">{{$parent.venue.get('name')}}</h1>
+        </ion-header-bar>
+        <ion-content>
+            <ion-list>
+                <ion-item menu-close ui-sref="venue.configuration()">
+                    <i class="icon ion-gear-a"></i> Configuration
+                </ion-item>
+                <ion-item menu-close href="#/venue">
+                    <i class="icon ion-social-buffer"></i> Social Networks
+                </ion-item>
+                <ion-item menu-close href="#/venue">
+                    <i class="icon ion-images"></i> Graphics
+                </ion-item>
+                <ion-item menu-close href="#/venue">
+                    <i class="icon ion-document-text"></i> About
+                </ion-item>
+                <ion-item menu-close href="#/venue">
+                    <i class="icon ion-chatboxes"></i> Reviews
+                </ion-item>
+                <ion-item menu-close ui-sref="venue.events()">
+                    <i class="icon ion-mic-c"></i> Events
+                </ion-item>
+                <ion-item menu-close href="#/venue">
+                    <i class="icon ion-pizza"></i> Products
+                </ion-item>
+                <ion-item menu-close href="#/venue">
+                    <i class="icon ion-pricetags"></i> Deals
+                </ion-item>
+            </ion-list>
+        </ion-content>
+    </ion-side-menu>
+</ion-side-menus>

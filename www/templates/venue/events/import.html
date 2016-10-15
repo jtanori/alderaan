@@ -1,0 +1,36 @@
+<ion-modal-view>
+    <ion-header-bar class="bar-stable">
+        <h1 class="title">Import Events</h1>
+    </ion-header-bar>
+    <ion-content  class="has-footer">
+        <table id="import-table" class="zebra bordered">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Active</th>
+                    <th>Featured</th>
+                    <th>About</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="record in events">
+                    <td>{{record.title}}</td>
+                    <td>{{record.eventDay}}</td>
+                    <td>{{record.description}}</td>
+                    <td>{{record.active}}</td>
+                    <td>{{record.featured}}</td>
+                    <td>{{record.about}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </ion-content>
+    <ion-footer-bar class="bar-stable">
+        <h1 class="title"></h1>
+        <div class="buttons" side="right">
+            <button type="button" class="button button-positive" ng-click="save()">Save</button>
+            <button type="button" class="button button-assertive button-clear" ng-click="closeDetailModal()">Cancel</a>
+        </div>
+    </ion-footer-bar>
+</ion-modal-view>

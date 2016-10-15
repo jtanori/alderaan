@@ -1,8 +1,12 @@
 angular.module('manager.controllers')
 
 .controller('CategoriesCtrl', function($scope, $rootScope, $timeout, $ionicPlatform, CategoriesService, $ionicLoading, $ionicModal, $ionicScrollDelegate, UtilsService){
-
     var _ = require('lodash');
+
+    if(_.isEmpty($rootScope.user)){
+        $state.go('app.home');
+        return;
+    }
 
     $scope.categories = [];
     $scope.error = null;
@@ -41,7 +45,7 @@ angular.module('manager.controllers')
                         $scope.$apply(function(){
                             $scope.categories = results;
                             $scope.corrupted = results.filter(function(c){
-                                if(_.isEmpty(c.slug)){
+                                if(_.isEmpty(c.slug) || _.isEmpty(c.keywords)){
                                     return c;
                                 }
                             }).length;
@@ -182,6 +186,12 @@ angular.module('manager.controllers')
 
 .controller('CategoryCtrl', function($scope, $rootScope, $timeout, $state, $stateParams, CategoriesService, $ionicLoading, $ionicPopup, UtilsService, LANGS, $ionicScrollDelegate){
     var _ = require('lodash');
+
+    if(_.isEmpty($rootScope.user)){
+        $state.go('app.home');
+        return;
+    }
+
     var notifier = require('node-notifier');
 
     $scope.category = false;
@@ -201,11 +211,20 @@ angular.module('manager.controllers')
         CategoriesService
             .getById($stateParams.id)
             .then(function(c){
-                $scope.category = c;
-
+                $timeout(function(){
+                    $scope.$apply(function(){
+                        $scope.category = c;
+                        $ionicScrollDelegate.$getByHandle('categoryScroll').resize();
+                    });
+                });
                 geti18n();
             }, function(e){
-                $scope.error = e.message;
+                $timeout(function(){
+                    $scope.$apply(function(){
+                        $scope.error = e.message;
+                        $ionicScrollDelegate.$getByHandle('categoryScroll').resize();
+                    });
+                });
             })
             .finally(function(){
                 $timeout(function(){

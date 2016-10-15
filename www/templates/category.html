@@ -1,6 +1,6 @@
 <ion-view view-title="{{category.displayName}}">
     <ion-nav-buttons side="left">
-        <a href="#/categories" class="button button-icon ion-ios-arrow-back"></a>
+        <a href="#/categories" class="button button-icon ion-ios-arrow-back" ng-disabled="saving"></a>
     </ion-nav-buttons>
     <ion-nav-buttons side="right">
         <a ng-click="remove()" class="button button-icon ion-ios-trash"></a>
@@ -63,7 +63,7 @@
                             <button class="button button-positive button-block" type="submit" ng-disabled="saving">Save Changes</button>
                         </div>
                         <div class="item text-center" ng-if="saving && category">
-                            <ion-spinner></ion-spinner> Saving
+                            <ion-spinner></ion-spinner><br />Saving
                         </div>
                         <div class="item assertive" ng-if="error">
                             <h2>Error</h2>

@@ -47,7 +47,10 @@ angular.module('manager.services')
         'venta',
         'compra',
         'para',
-        'otra'
+        'otra',
+        'espacio',
+        'abierto',
+        'público'
     ];
 
     var good = function(r){

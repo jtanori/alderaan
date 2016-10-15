@@ -1,0 +1,28 @@
+<ion-view view-title="Events">
+    <ion-nav-buttons side="right">
+        <a
+            class="button button-icon button-clear ion-upload"
+            ng-disabled="loading"
+            ngf-select="import($files)"
+            ngf-multiple="false"
+            ngf-pattern="'text/csv'"
+            ngf-accept="'text/csv'"></a>
+        <a class="button button-icon button-clear ion-plus-round" ng-disabled="loading" ui-sref="venue.addEvent()"></a>
+        <a class="button button-icon button-clear ion-refresh" ng-disabled="loading" ng-click="reload()"></a>
+    </ion-nav-buttons>
+    <ion-content>
+        <div class="assertive-bg padding light text-center" ng-if="error">
+            {{error}}
+        </div>
+        <div class="padding text-center" ng-if="error">
+            <button class="button button-positive button-small" ui-sref="venue.addEvent()">Add Event</button>
+        </div>
+        <ion-list>
+            <ion-item ng-repeat="item in $parent.events" ui-sref="venue.editEvent({id: item.objectId})">
+                <h2><i class="icon ion-pin assertive" ng-if="item.featured"></i> <i class="icon ion-power assertive" ng-if="item.active"></i> {{item.title}}</h2>
+                <p>Description: {{item.description}}</p>
+                <p>Date: {{item.eventDay.toLocaleString()}}</p>
+            </ion-item>
+        </ion-list>
+    </ion-content>
+</ion-view>

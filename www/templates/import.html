@@ -1,5 +1,5 @@
 <ion-view view-title="Import Venues">
-    <ion-content delegate-handle="importScrollHandle" ng-class="{'has-footer': records || importByCategoryRecords}">
+    <ion-content delegate-handle="importScrollHandle" ng-class="{'has-footer': records || categoryImportModel.items}">
         <div class="padding text-center" ng-if="loadingCategories">
             <ion-spinner></ion-spinner>
             <p>Loading Configuration...</p>
@@ -9,7 +9,7 @@
                 <ion-spinner></ion-spinner>
                 <p>Working...</p>
             </div>
-            <div class="padding" ng-if="!records && !importByCategoryRecords">
+            <div class="padding" ng-if="!records && !categoryImportModel.items">
                 <div id="import-drop" class="container row">
                     <div class="col col-center text-center" ng-if="!loading && !records">
                         <div class="button button-positive" ngf-select="upload($files)" ngf-multiple="false">Import Global</div>
@@ -54,14 +54,14 @@
                     </tbody>
                 </table>
             </div>
-            <div ng-if="importByCategoryRecords && !loading" class="padding">
+            <div ng-if="categoryImportModel.items && !loading" class="padding">
                 <div class="list">
 
                     <label class="item item-input item-select">
                         <div class="input-label">
                             Category
                         </div>
-                        <select ng-model="selectedCategory">
+                        <select ng-model="categoryImportModel.category">
                             <option value="{{c.id}}" ng-repeat="c in categories" required>{{c.name}}</option>
                         </select>
                     </label>
@@ -78,7 +78,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="record in importByCategoryRecords">
+                        <tr ng-repeat="record in categoryImportModel.items">
                             <td>{{$index}}</td>
                             <td>{{record.name}}</td>
                             <td>{{record.full_address}}</td>
@@ -92,7 +92,7 @@
     </ion-content>
     <ion-footer-bar class="bar-stable" ng-if="records">
         <div class="buttons">
-            <button class="button ion-close icon-left button-assertive" ng-disabled="importByCategoryRecords.length == 0 || saving" ng-click="cancelBatchImport()">Abort</button>
+            <button class="button ion-close icon-left button-assertive" ng-disabled="!categoryImportModel.items || categoryImportModel.items.length == 0 || saving" ng-click="cancelBatchImport()">Abort</button>
         </div>
         <h1 class="title">{{currentPage+1}}/{{pages}}</h1>
         <div class="buttons">
@@ -104,13 +104,13 @@
             <button class="button button-icon ion-arrow-right-b icon-right" ng-disabled="currentPage == chunks.length-1 || loading" ng-click="next()">Next</button>
         </div>
     </ion-footer-bar>
-    <ion-footer-bar class="bar-stable" ng-if="importByCategoryRecords">
+    <ion-footer-bar class="bar-stable" ng-if="categoryImportModel.items && categoryImportModel.items.length">
         <div class="buttons">
-            <button class="button ion-close icon-left button-assertive" ng-disabled="importByCategoryRecords.length == 0 || saving" ng-click="cancelImpotByCategory()">Abort</button>
+            <button class="button ion-close icon-left button-assertive" ng-disabled="categoryImportModel.items.length == 0 || saving" ng-click="cancelImpotByCategory()">Abort</button>
         </div>
-        <h1 class="title">{{importByCategoryRecords.length}} Records</h1>
+        <h1 class="title">{{categoryImportModel.items.length}} Records</h1>
         <div class="buttons">
-            <button class="button button-icon ion-upload icon-right" ng-disabled="importByCategoryRecords.length == 0 || saving || !selectedCategory" ng-click="saveRecordsForCategory()">Save</button>
+            <button class="button button-icon ion-upload icon-right" ng-disabled="categoryImportModel.items.length == 0 || saving || !categoryImportModel.category" ng-click="saveRecordsForCategory()">Save</button>
         </div>
     </ion-footer-bar>
 </ion-view>

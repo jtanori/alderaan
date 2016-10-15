@@ -1,6 +1,6 @@
 angular.module('manager.services')
 
-.factory('User', ['$localStorage', 'AuthService', '$q', 'UUID', function($localStorage, AuthService, $q, UUID){
+.factory('User', ['$localStorage', 'AuthService', '$q', 'UUID', '$http', function($localStorage, AuthService, $q, UUID, $http){
     var _current;
     var _ = require('lodash');
 
@@ -73,7 +73,7 @@ angular.module('manager.services')
                     var roles = this.roles.map(function(r){
                         return r.name;
                     });
-                    
+
                     if(roles.indexOf(role) === -1){
                         return false;
                     }else{
@@ -81,12 +81,18 @@ angular.module('manager.services')
                     }
                 },
                 getHighestRole: function(){
-                    return _.min(this.roles, function(r){return r.priority}).id;
+                    var roles = this.roles.sort(function(r){
+                        return r.priority;
+                    });
+
+                    return roles[0];
                 },
                 logOut: function(){
                     $localStorage.removeItem(token);
                     $localStorage.removeItem(token + '-roles');
                     $localStorage.removeItem('current-user');
+
+                    delete $http.defaults.headers.common['X-Parse-Session-Token'];
                 }
             };
 
@@ -116,19 +122,7 @@ angular.module('manager.services')
                 return defer.promise;
             },
             logOut: function(){
-                var defer = $q.defer();
-
-                AuthService
-                    .logOut()
-                    .then(function(response){
-                        instance.logOut();
-                        instance = null;
-                        defer.resolve();
-                    }, function(e){
-                        defer.reject(e);
-                    });
-
-                return defer.promise;
+                instance.logOut();
             },
             become: function(){
                 var defer = $q.defer();

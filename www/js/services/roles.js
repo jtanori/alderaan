@@ -157,7 +157,25 @@ angular.module('manager.services')
                         defer.reject({message: 'Could not add user to role: ' + id, code: 404});
                     }
                 }, function(e){
-                    defer.reject({message: e.message, code: e.code});
+                    defer.reject(e);
+                });
+
+            return defer.promise;
+        },
+        revoke: function(id, user){
+            var defer = $q.defer();
+
+            $http
+                .put(API_URL + '/manager/roles/' + id + '/users', {remove: true, id: id, user: user})
+                .then(function(c){
+                    if(!_.isEmpty(c)){
+                        console.log(c, 'revoked user?');
+                        defer.resolve(c.data.results);
+                    }else{
+                        defer.reject({message: 'Could not revoke user from role: ' + id, code: 404});
+                    }
+                }, function(e){
+                    defer.reject(e);
                 });
 
             return defer.promise;

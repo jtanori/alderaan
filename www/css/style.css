@@ -9,9 +9,17 @@ body {
 
 #import-drop {
     min-height: 300px;
+    position: relative;
+    background-size: cover;
+    background-position: center center;
 }
 
-#login, #forgot, #reset {
+#import-drop .col {
+    position: relative;
+    z-index: 2;
+}
+
+#login, #forgot, #reset, #verify {
     position: absolute;
     left: 50%;
     width: 500px;
@@ -110,4 +118,51 @@ table {
     border-bottom: 0;
     border-top: 1px solid #fff;
     background-color: #f1f1f1;
+}
+
+
+.angular-google-map-container { height: 200px; width: 100%;}
+
+.no-margin {
+    margin: 0 !important;
+}
+
+#venue-new-thumbnail {
+    position: absolute;
+    min-height: 100%;
+    left: 0;
+    top: 0;
+    max-height: 100%;
+    max-width: 100%;
+    z-index: 0;
+}
+
+.absolute.positioned {
+    position: absolute;
+}
+
+.absolute.positioned.top {
+    top: 0;
+}
+
+.absolute.positioned.right {
+    right: 0;
+}
+
+.margin-a {
+    margin: 0.5rem;
+}
+
+.no-margin {
+    margin: 0;
+}
+
+.no-padding {
+    padding: 0;
+}
+
+#event-edit #import-drop,
+#venue-home #import-drop {
+    background-repeat: no-repeat;
+    background-size: contain;
 }

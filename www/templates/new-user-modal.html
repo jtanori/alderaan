@@ -1,0 +1,25 @@
+<ion-modal-view>
+    <ion-header-bar class="bar-stable">
+        <h1 class="title">Invite New User</h1>
+        <a class="button button-icon ion-close" ng-click="closeInviteModal()"></a>
+    </ion-header-bar>
+    <ion-content class="has-footer">
+        <form ng-submit="invite()">
+            <label class="item item-input">
+                <span class="input-label">Email Address</span>
+                <input type="text" ng-model="model.email">
+            </label>
+            <label class="item item-input">
+                <span class="input-label">Phone Number</span>
+                <input type="tel" ng-model="model.phone">
+            </label>
+        </form>
+    </ion-content>
+    <ion-footer-bar class="bar-stable">
+        <h1 class="title"></h1>
+        <div class="buttons" side="right">
+            <button type="button" class="button button-positive" ng-click="invite()">Save</button>
+            <button type="button" class="button button-assertive button-clear" ng-click="cancelInvite()">Cancel</a>
+        </div>
+    </ion-footer-bar>
+</ion-modal-view>

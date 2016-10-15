@@ -1,0 +1,102 @@
+<ion-view view-title="Edit Event" id="event-edit">
+    <ion-nav-buttons side="left">
+        <a href="#/events" class="button button-icon ion-ios-arrow-back" ng-disabled="saving"></a>
+    </ion-nav-buttons>
+    <ion-content class="has-footer">
+        <div class="assertive-bg padding light text-center" ng-if="error">
+            {{error}}
+        </div>
+        <form ng-if="model">
+            <div id="import-drop" class="container row" style="background-image:url({{event._banner}})">
+                <button ng-if="event._banner" type="button" class="button button-small margin-a top right absolute positioned" ng-click="removeCover()"><i class="icon ion-close"></i> Remove Cover</button>
+                <div class="col col-center text-center">
+                    <div class="button button-stable button-small"
+                        ngf-select="uploadCover($files)"
+                        ngf-multiple="false"
+                        ngf-pattern="'image/*'"
+                        ngf-accept="'image/*'" ngf-max-size="5MB" ngf-min-width="600"
+                        ngf-resize="{width: 600, height: 600}">Upload Cover Picture</div>
+                    <button class="button button-light button-small" type="button">
+                        <i class="icon ion-link"></i> Use URL instead
+                    </button>
+                </div>
+            </div>
+            <label class="item item-input">
+                <span class="input-label">Event Name</span>
+                <input type="text" ng-model="event.title" ng-change="model.title = event.title">
+            </label>
+            <label class="item item-input" data-tap-disabled="true">
+                <span class="input-label">Description</span>
+                <textarea type="text" ng-model="event.description" rows="6" ng-change="model.description = event.description"></textarea>
+            </label>
+            <label class="item item-input" data-tap-disabled="true">
+                <span class="input-label">About Text</span>
+                <textarea type="text" ng-model="event.about" rows="6" ng-change="model.about = event.about"></textarea>
+            </label>
+            <div class="item item-toggle">
+                Active (publish)
+                <label class="toggle">
+                    <input type="checkbox" ng-model="event.active" ng-change="model.active = event.active">
+                    <div class="track">
+                        <div class="handle"></div>
+                    </div>
+                </label>
+            </div>
+            <div class="item item-toggle">
+                Featured
+                <label class="toggle">
+                    <input type="checkbox" ng-model="event.featured" ng-change="model.featured = event.featured">
+                    <div class="track">
+                        <div class="handle"></div>
+                    </div>
+                </label>
+            </div>
+            <label class="item item-input">
+                <span class="input-label">Price</span>
+                <input type="number" ng-model="event.price" placeholder="0.00" min="0" ng-change="model.price = event.price">
+            </label>
+            <label class="item item-input item-select">
+                <div class="input-label">
+                    Currency
+                </div>
+                <select ng-options="option.name for option in currencies track by option.objectId" ng-model="event.currency" ng-change="model.currency = event.currency"></select>
+            </label>
+
+            <datepicker
+                selector="form-control"
+                datepicker-append-to="#venue-new-event-datepicker"
+                data-tap-disabled="true"
+                date-set="{{event.eventDay.iso}}"
+                date-format="MM/dd/yyyy">
+                <label class="item item-input">
+                    <span class="input-label">Date</span>
+                    <input ng-model="event.eventDay" type="text" class="form-control" ng-change="model.eventDay = event.eventDay"/>
+                </label>
+                <div id="venue-new-event-datepicker"></div>
+            </datepicker>
+            <div class="row no-padding">
+                <label class="item item-input item-select col">
+                    <div class="input-label">
+                        Hour
+                    </div>
+                    <select ng-options="option.name for option in event.availableHours track by option.id" ng-model="event.hour" ng-change="model.hour = event.hour"></select>
+                </label>
+                <label class="item item-input item-select col">
+                    <div class="input-label">
+                        Minutes
+                    </div>
+                    <select ng-options="option.name for option in event.availableMinutes track by option.id" ng-model="event.minutes" ng-change="model.minutes = event.minutes"></select>
+                </label>
+            </div>
+        </form>
+    </ion-content>
+    <ion-footer-bar class="bar-stable">
+        <div class="buttons">
+            <button class="button button-assertive" ng-click="remove()"> Delete</button>
+        </div>
+        <h1 class="title"></h1>
+        <div class="buttons">
+            <button class="button button-icon ion-upload icon-left" ng-click="save()" ng-disabled="!canSave"> Save</button>
+        </div>
+    </ion-footer-bar>
+</ion-view>

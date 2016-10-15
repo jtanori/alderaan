@@ -1,0 +1,101 @@
+<ion-view view-title="Venues">
+    <ion-nav-buttons side="right">
+        <a class="button button-icon button-clear ion-location" ng-if="role && role.name.toLowerCase() === 'superadmin' || 'admin'" ng-click="getPosition()"></a>
+        <a class="button button-icon button-clear ion-plus-round" ng-disabled="loading" ng-click="openModal()"></a>
+    </ion-nav-buttons>
+    <ion-content>
+        <div ng-if="role && role.name.toLowerCase() === 'superadmin'" data-tap-disabled="true">
+            <form map-lazy-load="https://maps.google.com/maps/api/js" map-lazy-load-params="{{googleMapsURL}}">
+                <label class="item item-input" id="venue-search-box">
+                    <span class="input-label">Address</span>
+                    <input type="text" places-auto-complete ng-model="model.address" on-place-changed="placeChanged()" types="{{map.searchTypes}}">
+                </label>
+                <label class="item item-input" id="venue-search-box">
+                    <span class="input-label">Search</span>
+                    <input type="text" ng-model="model.q" placeholder="slug, keywords or name">
+                </label>
+                <label class="item item-input item-select" ng-disabled="!categories">
+                    <div class="input-label">
+                        Category
+                    </div>
+                    <select ng-model="model.category">
+                        <option value="{{c.id}}" ng-repeat="c in categories" required>{{c.name}}</option>
+                    </select>
+                </label>
+                <ng-map center="[{{map.center.latitude}}, {{map.center.longitude}}]" zoom="{{map.zoom}}" id="venue-search-map">
+                    <marker
+                        position="[{{marker.get('position').latitude}}, {{marker.get('position').longitude}}]"
+                        ng-repeat="marker in items track by marker.id"
+                        on-click="showVenue(marker)"></marker>
+                    <marker
+                        id="map-center-marker"
+                        position="[{{marker.coords.latitude}}, {{marker.coords.longitude}}]"
+                        title=""
+                        draggable="true"
+                        icon="{{map.positionMarker.icon}}"
+                        on-position_changed="onPositionMarkerPositionChange(event)"
+                        color="#000000"
+                        z-index="2"
+                        >
+                    </marker>
+                    <shape
+                        name="circle"
+                        stroke-color="#0000FF"
+                        stroke-opacity="0.5"
+                        stroke-weight="1"
+                        fill-color="#0000FF"
+                        fill-opacity="0.25"
+                        center="[{{circle.coords.latitude}}, {{circle.coords.longitude}}]"
+                        radius="{{circle.radius}}"
+                        control="circle.radiusControl"
+                        editable="true"
+                        draggable="false"
+                        on-radius_changed="setRadius()"
+                        z-index="1"
+                        id="map-radius">
+                    </shape>
+                </ng-map>
+                <button type="submit" class="button button-positive button-full no-margin" ng-click="submit()">Search</button>
+                <div ng-if="currentModel">
+                    <div class="padding">
+                        <h3>{{currentModel.get('name')}}</h3>
+                        <p>{{(currentModel.get('full_address') || (currentModel.getAddress()) + ', ' + currentModel.getCity() + ', ' + currentModel.getVecinity())}}</p>
+                    </div>
+                    <div class="button-bar">
+                        <a class="button button-icon ion-gear-a button-clear" ng-click="editVenue('configuration', currentModel)"> Configuration</a>
+                        <a class="button button-icon ion-social-buffer button-clear" ng-click="editVenue('social', currentModel)"> Social Networks</a>
+                        <a class="button button-icon ion-images button-clear" ng-click="editVenue('graphics', currentModel)"> Graphics</a>
+                        <a class="button button-icon ion-document-text button-clear" ng-click="editVenue('about', currentModel)"> About</a>
+                    </div>
+                    <div class="button-bar">
+                        <a class="button button-icon ion-chatboxes button-clear" ng-click="editVenue('reviews', currentModel)"> Reviews</a>
+                        <a class="button button-icon ion-mic-c button-clear" ng-click="editVenue('events', currentModel)"> Events</a>
+                        <a class="button button-icon ion-pizza button-clear" ng-click="editVenue('products', currentModel)"> Products</a>
+                        <a class="button button-icon ion-pricetags button-clear" ng-click="editVenue('deals', currentModel)"> Deals</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div ng-if="role && role.name.toLowerCase() === 'editor'">
+
+        </div>
+        <div ng-if="role && role.name.toLowerCase() === 'common'">
+            <div class="row">
+                <div class="col">
+                    <div class="list" ng-if="items && items.length">
+                        <div class="item" ng-repeat="item in items" ng-click="preview(item)">
+                            <h2>{{item.name}}</h2>
+                            <p>{{item.activity_description}}</p>
+                        </div>
+                    </div>
+                    <div ng-if="error">
+                        {{error}}
+                    </div>
+                </div>
+                <div class="col" ng-if="item">
+                    {{item}}
+                </div>
+            </div>
+        </div>
+    </ion-content>
+</ion-view>
