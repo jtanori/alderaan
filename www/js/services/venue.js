@@ -5,6 +5,7 @@ angular.module('manager.services')
 
     var _ = require('lodash');
     var s = require('underscore.string');
+    var Category = Parse.Object.extend('Category');
 
     var toCoords = function(v){
         if(_.isNumber(v)){
@@ -138,34 +139,42 @@ angular.module('manager.services')
         return defer.promise;
     };
 
-    var categoryImport = function(category, items){
+    var batchImport = function(items, category){
         var defer = $q.defer();
-
-        console.log($rootScope.user.is('Admin'), $rootScope.user.is('SuperAdmin'));
-
+        var requests = [];
         if(category && items && $rootScope.user.is('SuperAdmin') || $rootScope.user.is('Admin')){
-            $http
-                .post(API_URL + '/manager/venues/import', {category: category, items: items})
-                .then(function(c){
-                    if(!_.isEmpty(c)){
-                        defer.resolve(c.data);
-                    }else{
-                        defer.reject({message: 'No venues found', code: 404});
-                    }
-                }, function(e){
-                    defer.reject(e);
-                });
+            if(items.length > 200) {
+              items = _.chunk(items, 200);
+              requests = items.map(function(i) {
+                return $http.post(API_URL + '/manager/venues/import', {category: category, items: i});
+              });
+            } else {
+              requests.push($http.post(API_URL + '/manager/venues/import', {category: category, items: items}));
+            }
+
+            $q
+              .all(requests)
+              .then(function(c){
+                  if(!_.isEmpty(c)){
+                    console.log(c, 'c');
+                      defer.resolve(c.data);
+                  }else{
+                      defer.reject({message: 'No venues imported', code: 404});
+                  }
+              }, function(e){
+                  defer.reject(e);
+              });
         }else{
-            q.reject({message: 'Please provide all the details needed for import\nYou need to be a privileged user, set a category and pass a set of items to import.'});
+            $q.reject({message: 'Please provide all the details needed for import\nYou need to be a privileged user, set a category and pass a set of items to import.'});
         }
 
         return defer.promise;
-    }
+    };
 
     return {
     	parse: parseVenue,
-        fetch: fetch,
-        import: categoryImport
+      fetch: fetch,
+      import: batchImport
     };
 })
 

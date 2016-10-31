@@ -13,6 +13,13 @@
                     <span class="input-label">Password</span>
                     <input type="password" ng-model="user.password">
                 </label>
+                <div class="item assertive" ng-if="error">
+                  <ul>
+                    <li ng-repeat="e in error">
+                      {{e}}
+                    </li>
+                  </ul>
+                </div>
                 <label class="item">
                     <button class="button button-block button-positive" type="submit">Login</button>
                 </label>

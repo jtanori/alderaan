@@ -152,6 +152,23 @@ angular.module('manager.services')
                 });
 
             return defer.promise;
+        },
+        importCountries: function(data) {
+          var defer = $q.defer();
+
+          $http
+              .post(API_URL + '/manager/countries', {items: data})
+              .then(function(s){
+                  if(!_.isEmpty(s) && !_.isEmpty(s.data)){
+                      defer.resolve(s.data.results);
+                  }else{
+                      defer.reject({message: 'No countries added', code: 404});
+                  }
+              }, function(e){
+                  defer.reject({message: e.message, code: e.code});
+              });
+
+          return defer.promise;
         }
     }
 });

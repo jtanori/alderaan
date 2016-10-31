@@ -1,7 +1,8 @@
 angular.module('manager.controllers')
 
-.controller('LoginCtrl', function($rootScope, $scope, $state, $timeout, User, $ionicLoading){
+.controller('LoginCtrl', function($rootScope, $scope, $state, $timeout, User, $ionicLoading, validations){
     var _ = require('lodash');
+    var validate = require('validate.js');
 
     if(!_.isEmpty($rootScope.user)){
         $state.go('app.home');
@@ -11,7 +12,15 @@ angular.module('manager.controllers')
     $scope.userMaster = {username: '', password: ''};
     $scope.user = angular.copy($scope.userMaster);
     $scope.login = function(){
+      var data = {
+        username: $scope.user.username,
+        password: $scope.user.password
+      };
+      var validationErrors = validate(data, validations.login);
+console.log(validationErrors);
+      if(!validationErrors) {
         $ionicLoading.show({template: 'Authenticating...'});
+        $scope.error = false;
         User
             .logIn($scope.user.username, $scope.user.password)
             .then(function(){
@@ -20,11 +29,15 @@ angular.module('manager.controllers')
                 $state.go('app.home');
             }, function(e){
                 $scope.user.password = '';
-                alert(e.message);
+                $scope.error = validations.toArray(e.message);
             })
             .finally(function(){
                 $ionicLoading.hide();
-            })
+            });
+      } else {
+        console.log(validationErrors, validations.toArray(validationErrors));
+        $scope.error = validations.toArray(validationErrors);
+      }
     };
 })
 

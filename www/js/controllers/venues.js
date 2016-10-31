@@ -1,6 +1,6 @@
 angular.module('manager.controllers')
 
-.controller('VenuesCtrl', function($rootScope, $scope, $state, $timeout, User, $ionicLoading, $ionicModal, VenueService, VenuesService, CategoriesService, $localStorage, DEFAULT_CENTER, GEO_DEFAULT_SETTINGS, GOOGLE_MAPS_API_URL, NgMap, DEFAULT_RADIUS){
+.controller('VenuesCtrl', function($rootScope, $scope, $state, $timeout, User, $ionicLoading, $ionicModal, VenueService, VenuesService, CategoriesService, $localStorage, DEFAULT_CENTER, GEO_DEFAULT_SETTINGS, GOOGLE_MAPS_API_URL, NgMap, DEFAULT_RADIUS, GeolocationService){
     var _ = require('lodash');
     const dialog = require('electron').remote.dialog;
 
@@ -16,7 +16,7 @@ angular.module('manager.controllers')
     $scope.map = {
         center: DEFAULT_CENTER,
         zoom: 13,
-        searchTypes: ['address'],
+        searchTypes: ['geocode'],
         positionMarker: {
             icon: {
                 url: 'img/marker_location.png',
@@ -144,6 +144,8 @@ angular.module('manager.controllers')
         NgMap.getMap({id: id}).then(function(map) {
             $scope.map.control = map;
             $scope.getPosition();
+
+            google.maps.event.trigger($scope.map,'resize');
         });
     };
 
@@ -156,11 +158,14 @@ angular.module('manager.controllers')
     };
 
     $scope.getPosition = function(){
-        navigator.geolocation.getCurrentPosition($scope.onPosition, $scope.onPositionError, GEO_DEFAULT_SETTINGS);
+      $ionicLoading.show({template: 'Getting Position'});
+      navigator.geolocation.getCurrentPosition($scope.onPosition, $scope.onPositionError, GEO_DEFAULT_SETTINGS);
     };
 
     $scope.onPosition = function(pos){
         var crd = pos.coords;
+
+        console.log('position');
 
         $timeout(function(){
             $scope.$apply(function(){
@@ -169,12 +174,24 @@ angular.module('manager.controllers')
                 $scope.map.zoom = 12;
 
                 $scope.map.control.setCenter(new google.maps.LatLng(crd.latitude, crd.longitude));
+                $ionicLoading.hide();
             });
         });
     };
 
     $scope.onPositionError = function(e){
-        dialog.showErrorBox('Error', e.message);
+
+      $ionicLoading.show({template: 'Getting Position (2)'});
+      GeolocationService
+        .getCurrentPosition()
+        .then(function(position) {
+          console.log('got position', position);
+        }, function(geoError) {
+          dialog.showErrorBox('Error', e.message + '\n' + geoError.message);
+        })
+        .finally(function() {
+          $ionicLoading.hide();
+        })
     };
 
     $scope.openModal = function(){

@@ -1,6 +1,6 @@
 angular.module('manager.controllers')
 
-.controller('GeoCtrl', function($scope, $timeout, $rootScope, $ionicPlatform, GeoService, $ionicLoading){
+.controller('GeoCtrl', function($scope, $timeout, $rootScope, $ionicPlatform, GeoService, $ionicLoading, $ionicScrollDelegate, $ionicModal, validations){
     var _ = require('lodash');
 
     if(_.isEmpty($rootScope.user)){
@@ -8,8 +8,16 @@ angular.module('manager.controllers')
         return;
     }
 
+    var Papa = require('papaparse');
+    var slugify = require('underscore.string/slugify');
+    var cleanDiacritics = require('underscore.string/cleanDiacritics');
+    var validate = require('validate.js');
+    var notifier = require('node-notifier');
+
     $scope.countries = [];
     $scope.error = null;
+    $scope.records = [];
+    $scope.previewRecords = [];
 
     $scope.refresh = function(force){
         $timeout(function(){
@@ -36,6 +44,134 @@ angular.module('manager.controllers')
                     });
                 });
             });
+    };
+
+    //Upload file to Manager
+    $scope.upload = function(files){
+      if (files && files.length) {
+        $timeout(function(){
+          $scope.$apply(function(){
+            $scope.loading = true;
+          });
+        });
+
+        var file = files[0];
+
+        Papa.parse(file, {
+          //worker: true,
+          header: true,
+          dynamicTyping: false,
+          skipEmptyLines: true,
+          complete: function(results){
+            if(results){
+              if(results.data){
+
+                $scope.importError = [];
+                $scope.records = results.data.map(function(c){
+                  c.active = false;
+                  c.slug = slugify(c.name);
+                  c.displayName = c.name;
+                  c.name = cleanDiacritics(c.name);
+
+                  return c;
+                }).filter(function(c) {
+                  try {
+                    var hasErrors = validate(c, validations.countryImport);
+
+                    if(!hasErrors) {
+                      return c;
+                    } else {
+                      $scope.importError.push(validations.toArray(hasErrors));
+                    }
+                  } catch(e) {
+                    $scope.importError.push(e.message);
+                  }
+                });
+
+                $ionicScrollDelegate.$getByHandle('countries-scroll').resize();
+                $ionicScrollDelegate.$getByHandle('countries-scroll').scrollTop(false);
+
+                $scope.openImportModal();
+              }
+              if(results.errors && results.errors.length){
+                $scope.errors = results.errors;
+                $scope.error = 'Some errors found';
+              }
+
+              $timeout(function(){
+                $scope.$apply(function(){
+                  $scope.loading = false;
+                });
+              });
+            }else{
+              $scope.error = 'Nothing to parse, please check your CSV file';
+            }
+          }
+        });
+      }
+    };
+
+    $scope.openImportModal = function(id){
+        $scope.previewRecords = $scope.records;
+
+        if(!$scope._previewModal){
+            $ionicModal.fromTemplateUrl('templates/import-countries.html', {
+                scope: $scope,
+                animation: 'slide-in-up'
+            }).then(function(modal) {
+                $scope._previewModal = modal;
+                $scope._previewModal
+                  .show()
+                  .then(function() {
+                    $ionicScrollDelegate.$getByHandle('countries-import-scroll').resize();
+                    $ionicScrollDelegate.$getByHandle('countries-import-scroll').scrollTop(false);
+                  });
+            });
+        }else{
+            $scope._previewModal
+              .show()
+              .then(function() {
+                $ionicScrollDelegate.$getByHandle('countries-import-scroll').resize();
+                $ionicScrollDelegate.$getByHandle('countries-import-scroll').scrollTop(false);
+              });
+        }
+    };
+
+    $scope.closeImportModal = function() {
+      $timeout(function() {
+        $scope.$apply(function() {
+          $scope.records = [];
+          $scope.previewRecords = [];
+          $scope._previewModal.hide();
+        });
+      });
+    }
+
+    $scope.save = function() {
+      if($scope.records) {
+        $ionicLoading.show({template: 'Importing Countries...'});
+        GeoService
+          .importCountries($scope.records)
+          .then(function(results) {
+            $scope.closeImportModal();
+            notifier.notify({
+                title: 'Done',
+                message: 'Countries file has been imported',
+                sound: true, // Only Notification Center or Windows Toasters
+                wait: true // Wait with callback, until user action is taken against notification
+            });
+            $scope.refresh();
+          })
+          .finally(function() {
+            $ionicLoading.hide();
+          });
+      } else {
+        alert('Something went wrong', 'For some reason we did not find any records to save, please check your data and try again.');
+      }
+    };
+
+    $scope.cancel = function() {
+      $scope.closeImportModal();
     };
 
     $scope.$on('$ionicView.enter', function(){

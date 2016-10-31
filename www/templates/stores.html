@@ -1,0 +1,30 @@
+<ion-view view-title="Stores">
+    <ion-nav-buttons side="right">
+        <a class="button button-icon button-clear ion-refresh" ng-disabled="loading" ng-click="refresh(true)"></a>
+        <a class="button button-icon button-clear ion-plus-round" ng-disabled="loading" ng-click="add()"></a>
+    </ion-nav-buttons>
+    <form class="bar bar-subheader item-input-inset" ng-if="!loading" ng-disabled="!items.length" ng-class="{disabled: categories.length}">
+        <label class="item-input-wrapper">
+            <i class="icon ion-ios-search placeholder-icon"></i>
+            <input ng-disabled="!items.length" type="search" placeholder="Search" ng-model="data.q" ng-change="filter(data.q)" ng-model-options="{ debounce: 500 }">
+        </label>
+        <button class="button button-clear" type="submit" ng-disabled="!items.length">
+            Search
+        </button>
+    </form>
+    <ion-content has-subheader="true" class="has-subheader" delegate-handle="stores-scroll">
+        <div class="text-center padding" ng-if="loading"><ion-spinner></ion-spinner><p>Loading...</p></div>
+        <ion-list ng-if="!loading && items.length">
+            <ion-item ng-repeat="item in items" ui-sref="app.store({id: item.objectId})" ng-if="!item.hidden">
+                <h2>{{$index+1}}) {{item.displayName}} <i class="icon ion-ios-pulse-strong" ng-if="item.active"></i></h2>
+                <p>Keywords: {{item.keywords}}</p>
+                <p>Last updated: {{item.updatedAt}}</p>
+            </ion-item>
+        </ion-list>
+        <div ng-if="!loading && !items.length" class="padding text-center">
+          <div ng-if="!records.length">
+              <div class="button button-positive" ng-click="add()">Create Store</div>
+          </div>
+        </div>
+    </ion-content>
+</ion-view>

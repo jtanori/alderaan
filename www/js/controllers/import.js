@@ -1,6 +1,6 @@
 angular.module('manager.controllers')
 
-.controller('ImportCtrl', function($scope, $rootScope, $timeout, Upload, UtilsService, VenueService, $ionicLoading, $ionicScrollDelegate, CategoriesService, $ionicModal, GOOGLE_MAPS_API_KEY){
+.controller('ImportCtrl', function($scope, $q, $rootScope, $timeout, Upload, UtilsService, VenueService, $ionicLoading, $ionicScrollDelegate, CategoriesService, $ionicModal, GOOGLE_MAPS_API_KEY){
     var _ = require('lodash');
 
     if(_.isEmpty($rootScope.user)){
@@ -21,14 +21,16 @@ angular.module('manager.controllers')
     var notifier = require('node-notifier');
     var gm = require('googlemaps');
     var gmAPI = new gm({key: GOOGLE_MAPS_API_KEY});
+    var async = require('async');
 
     $scope.log = '';
     $scope.records = null;
     $scope.errors = null;
     $scope.loading = true;
-    $scope.dirName = '';
+    $scope.savingAll = false;
     $scope.documents = {};
     $scope.categories = [];
+    $scope.categoriesFound = [];
     $scope.data = {currentPage: $scope.currentPage};
     $scope.$watch('files', function () {
         if($scope.files && $scope.files.length){
@@ -47,8 +49,6 @@ angular.module('manager.controllers')
 
             var file = files[0];
 
-            $scope.dirName = file.name.replace('.csv', '');
-
             Papa.parse(file, {
                 //worker: true,
                 header: true,
@@ -61,25 +61,24 @@ angular.module('manager.controllers')
                             var docs = {};
 
                             _.sortBy(results.data, function(v){
-                                    return slugify(v.activity_description).toLowerCase();
-                                })
-                                .forEach(function(v, i){
-                                    var doc = slugify(v.activity_description).toLowerCase();
-                                    var venue = VenueService.parse(v, {from_batch: true});
+                                return slugify(v.activity_description).toLowerCase();
+                            })
+                            .forEach(function(v, i){
+                                var doc = slugify(v.activity_description).toLowerCase();
+                                var venue = VenueService.parse(v, {from_batch: true});
 
-                                    if(docs[doc]){
-                                        docs[doc].push(venue);
-                                    }else{
-                                        docs[doc] = [venue];
-                                    }
-                                });
+                                if(docs[doc]){
+                                    docs[doc].push(venue);
+                                }else{
+                                    docs[doc] = [venue];
+                                }
+                            });
 
                             if(!_.isEmpty(docs)){
-                                console.log('docs not empty', docs);
                                 var size = _.size(docs);
                                 var keys = _.keys(docs);
 
-                                var index = _.chunk(keys, 25);
+                                var index = _.chunk(keys, 15);
                                 var chunks = index.map(function(indexes, i){
                                     var d = {};
 
@@ -95,7 +94,6 @@ angular.module('manager.controllers')
                                         $scope.chunks = chunks;
                                         $scope.pages = chunks.length;
                                         $scope.currentPage = 0;
-                                        $scope.pagesArray = _.range($scope.pages);
                                     });
                                 });
                             }else{
@@ -105,7 +103,6 @@ angular.module('manager.controllers')
                                         $scope.pages = 0;
                                         $scope.currentPage = 0;
                                         $scope.error = 'No valid data found';
-                                        $scope.pagesArray = [];
                                     });
                                 });
                             }
@@ -121,8 +118,6 @@ angular.module('manager.controllers')
                                         message: 'Found ' + $scope.chunks.length + ' documents',
                                         sound: true, // Only Notification Center or Windows Toasters
                                         wait: true // Wait with callback, until user action is taken against notification
-                                    }, function(){
-                                        console.log('call back', arguments);
                                     });
                                 });
                             });
@@ -178,9 +173,6 @@ angular.module('manager.controllers')
                                                             return venue;
                                                         });
                                     $scope.loading = false;
-
-
-                                    console.log('category records', $scope.categoryImportModel);
                                 });
                             });
                         }
@@ -232,7 +224,7 @@ angular.module('manager.controllers')
             $ionicLoading.show({template: '<ion-spinner></ion-spinner><br />Saving, this may take a moment'});
 
             VenueService
-                .import(data.category, data.items)
+                .import(data.items, data.category)
                 .then(function(){
                     dialog.showMessageBox({title: 'Success', buttons: ['Ok'], type: 'info', message: 'Venues have been imported'});
                     //Clear results
@@ -258,7 +250,6 @@ angular.module('manager.controllers')
                 $scope.chunks = [];
                 $scope.pages = null;
                 $scope.currentPage = null;
-                $scope.pagesArray = [];
                 $scope.documents = {};
                 $scope.records = null;
             });
@@ -288,14 +279,12 @@ angular.module('manager.controllers')
     $scope.goTo = function(index){
         $timeout(function(){
             $scope.$apply(function(){
-                $scope.currentPage = index*1;
+                $scope.currentPage = index * 1;
             });
         });
     };
 
     $scope.runFilter = function(i, altKeywords){
-        console.log(i, 'index', $scope.records[i]);
-
         var records = angular.copy($scope.records[i]);
         var docs = {};
         var recordCount = 0;
@@ -348,8 +337,6 @@ angular.module('manager.controllers')
                             return r;
                         }
                     });
-
-                    console.log($scope.records, 'records');
                     //records._additionalKeywords = '';
                     $ionicScrollDelegate.$getByHandle('importScrollHandle').resize();
 
@@ -364,7 +351,6 @@ angular.module('manager.controllers')
     };
 
     $scope.$watch('currentPage', function(c, p){
-        console.log('current page', c, p);
         $timeout(function(){
             $scope.$apply(function(){
                 $scope.loading = true;
@@ -374,7 +360,6 @@ angular.module('manager.controllers')
                 $timeout(function(){
                     $scope.$apply(function(){
                         $scope.records = $scope.chunks[c];
-                        console.log($scope.records, 'records');
                         $scope.loading = false;
                         $ionicScrollDelegate.$getByHandle('importScrollHandle').resize();
                         $ionicScrollDelegate.$getByHandle('importScrollHandle').scrollTop(false);
@@ -386,31 +371,138 @@ angular.module('manager.controllers')
 
     $scope.save = function(record, index){
         if(record.category){
-            var data = angular.copy(record);
-            var category = record.category;
+          var data = angular.copy(record);
 
-            delete data.category;
+          delete data.category;
+          delete data.categoryText;
+          delete data.categoriesFound;
 
-            var venues = data.map(function(r){
-                r.category = category;
-                return r;
-            });
+          record.saving = true;
 
-            record.saving = true;
+          return VenueService
+              .import(data, record.category.id)
+              .then(function(response){
+                  notifier.notify({
+                      title: 'Venues Saved',
+                      message: 'Your venues have been saved.',
+                      sound: true, // Only Notification Center or Windows Toasters
+                      wait: true // Wait with callback, until user action is taken against notification
+                  });
+                  $timeout(function() {
+                    $scope.$apply(function() {
+                      record = null;
+                      delete $scope.records[index];
 
-            CategoriesService
-                .saveCollection(venues)
-                .then(function(response){
-                    console.log('venues saved', response)
-                }, function(e){
-                    console.log('error saving', e);
-                })
-                .finally(function(){
-                    record.saving = false;
-                    record = null;
-                });
+                      if(_.isEmpty($scope.records)) {
+                        $scope.records = null;
+                        $scope.loading = false;
+                      }
+                    });
+                  });
+              }, function(e){
+                record.saving = false;
+                alert('Error', e.message);
+              });
         }
-    }
+    };
+
+    $scope.saveAll = function(){
+        var canSaveAll = $scope.canSaveAll();
+        var series;
+        var records;
+        if(!canSaveAll) {
+          alert('Please set category to all groups.');
+        } else {
+          $timeout(function() {
+            $scope.$apply(function() {
+              $scope.savingAll = true;
+              $ionicLoading.show({template: 'Saving All Records<br />This may take a while<br />Whant some coffee?'});
+
+              series = _.chain($scope.records).omit('$$hashKey').map(function(record, index) {
+                var items = _.omit(record, ['category', 'categoryText', 'categoriesFound']);
+
+                items = _.map(items, function(i) {
+                  return i;
+                });
+
+                return function(cb) {
+                  VenueService
+                    .import(items, record.category.id)
+                    .then(function() {
+                      $timeout(function() {
+                        $scope.$apply(function() {
+                          record = null;
+                          delete $scope.records[index];
+
+                          if(_.isEmpty($scope.records)) {
+                            $scope.records = null;
+                            $scope.loading = false;
+                          }
+                        });
+                      });
+
+                      cb();
+                    }, function(e) {
+                      cb(e);
+                    });
+                }
+              }).value();
+
+              async.series(series, function(err, results){
+                $timeout(function() {
+                  $scope.$apply(function() {
+                    $scope.savingAll = false;
+                    $ionicLoading.hide();
+
+                    if(err) {
+                      console.log(err, 'error');
+                      alert('Error', err.message);
+                    } else {
+                      notifier.notify({
+                          title: 'Venues Saved',
+                          message: 'Your venues have been saved.',
+                          sound: true,
+                          wait: true
+                      });
+
+                      if($scope.chunks.length > 1) {
+                        // Remove saved items
+                        $scope.chunks.splice($scope.currentPage, 1);
+                        // Go to previous page if this is the last one
+                        if($scope.currentPage === $scope.chunks.length) {
+                          $scope.records = $scope.chunks[$scope.currentPage - 1];
+                          $scope.currentPage = $scope.currentPage - 1;
+                        } else {
+                          $scope.records = $scope.chunks[$scope.currentPage];
+                        }
+
+                      } else {
+                        $scope.chunks = [];
+                        $scope.pages = null;
+                        $scope.currentPage = null;
+                        $scope.documents = {};
+                        $scope.records = null;
+                      }
+                    }
+                  });
+                });
+              });
+            });
+          });
+        }
+    };
+
+    $scope.canSaveAll = function() {
+      var noHasCategory = _.chain($scope.records)
+        .omit('$$hashKey')
+        .find(function(r){
+          if(_.isEmpty(r.category)) {
+            return r;
+          }
+        }).value();
+
+      return !noHasCategory;
+    };
 
     $scope.detail = function(id){
         $scope.previewRecords = $scope.records[id];
@@ -439,7 +531,7 @@ angular.module('manager.controllers')
         var params = {
             center: lat + ',' + lng,
             zoom: 15,
-            size: '650x600',
+            size: '640x600',
             maptype: 'roadmap',
             markers: [
                 {
@@ -455,6 +547,59 @@ angular.module('manager.controllers')
         w.focus();
     };
 
+    $scope.categoryLookup = function(record, showAll) {
+      if(record && record.categoryText) {
+        var text = record.categoryText.toLowerCase();
+        var categories = $scope.categories.filter(function(c) {
+          var found = false;
+          var name = c.name.toLowerCase();
+          if(name.indexOf(text) >= 0) {
+            found = true;
+          }
+
+          if(!_.isEmpty(c.keywords) && _.isArray(c.keywords)) {
+            found = c.keywords.find(function(k) {
+              // If search is index of keyword
+              if(k.indexOf(text) >= 0) {
+                return true;
+              }
+
+              // If keyword is index of search
+              if(text.indexOf(k) >= 0) {
+                return true;
+              }
+            });
+          }
+
+          if(found) {
+            return found;
+          }
+        });
+
+        record.categoriesFound = categories;
+      } else if(showAll){
+        record.categoriesFound = $scope.categories;
+      } else {
+        record.categoriesFound = [];
+      }
+    };
+
+    $scope.showAllCategories = function($event, record) {
+      if($event && $event.keyCode === 40) {
+        $scope.categoryLookup(record, true);
+      }
+    }
+
+    $scope.setCategory = function(category, record) {
+      $timeout(function(){
+        $scope.$apply(function(){
+          record.categoriesFound = [];
+          record.categoryText = category.name;
+          record.category = category;
+        });
+      });
+    }
+
     $scope.$on('$ionicView.enter', function(){
         $timeout(function(){
             $scope.$apply(function(){
@@ -466,7 +611,7 @@ angular.module('manager.controllers')
             .get()
             .then(function(c){
                 $scope.categories = c.map(function(cat){
-                    return {id: cat.id, name: cat.displayName};
+                    return {id: cat.id, name: cat.displayName, keywords: cat.keywords};
                 });
 
                 return _.map(c, function(c){return {id: c.id, indicators: c.indicators, keywords: c.keywords};});

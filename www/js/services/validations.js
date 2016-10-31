@@ -1,0 +1,123 @@
+var _ = require('lodash');
+
+angular.module('manager.services')
+
+.constant('validations', {
+  login: {
+    username: {
+      presence: true,
+      email: true
+    },
+    password: {
+      presence: true,
+      length: {
+        minimum: 6,
+        message: "must be at least 6 characters"
+      }
+    }
+  },
+  categoryImport: {
+    displayName: {
+      presence: true,
+      length: {
+        minimum: 3
+      }
+    },
+    keywords: {
+      presence: true
+    },
+    active: {
+      presence: true
+    },
+    primary: {
+      presence: true
+    }
+  },
+  countryImport: {
+    name: {
+      presence: true
+    },
+    displayName: {
+      presence: true,
+      length: {
+        minimum: 2
+      }
+    },
+    'country-code': {
+      presence: true,
+      length: {
+        is: 3
+      }
+    },
+    slug: {
+      presence: true
+    },
+    active: {
+      presence: true
+    }
+  },
+  category: {
+    displayName: {
+      presence: true,
+      length: {
+        minimum: 3
+      }
+    },
+    slug: {
+      presence: true,
+      length: {
+        minimum: 3
+      },
+      format: {
+        pattern: "[a-z0-9\-]+",
+        flags: "i",
+        message: "can only contain a-z, 0-9 and - (dashes)"
+      }
+    },
+    keywords: {
+      presence: true,
+      length: {
+        minimum: 2
+      }
+    }
+  },
+  store: {
+    displayName: {
+      presence: true,
+      length: {
+        minimum: 2
+      }
+    },
+    slug: {
+      presence: true,
+      length: {
+        minimum: 2
+      }
+    },
+    keywords: {
+      presence: true,
+      length: {
+        minimum: 2
+      }
+    }
+  },
+  toArray: function(items) {
+    var messages = [];
+
+    if(_.isObject(items)) {
+      _.each(items, function(e) {
+        if(_.isArray(e)) {
+          e.forEach(function(m) {
+            messages.push(m);
+          });
+        } else {
+          messages.push(e);
+        }
+      });
+    } else if(_.isString(items)) {
+      messages.push(items);
+    }
+
+    return messages;
+  }
+})

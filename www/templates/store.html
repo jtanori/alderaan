@@ -1,0 +1,82 @@
+<ion-view view-title="{{item.displayName}}">
+    <ion-nav-buttons side="left">
+        <a ui-sref="app.stores" class="button button-icon ion-ios-arrow-back" ng-disabled="saving"></a>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="right">
+        <a ng-click="remove()" class="button button-icon ion-ios-trash"></a>
+    </ion-nav-buttons>
+    <ion-content delegate-handle="store-scrolle">
+        <div class="text-center padding" ng-if="loading"><ion-spinner></ion-spinner><p>Loading...</p></div>
+        <div ng-if="!loading && item">
+            <div class="row">
+                <div class="col">
+                    <form class="card" ng-submit="save()">
+                        <div class="item" ng-if="item">
+                            <h2>Store Details</h2>
+                        </div>
+                        <label class="item item-input item-stacked-label">
+                            <span class="input-label">Display Name</span>
+                            <input type="text" value="{{item.displayName}}" ng-model="item.displayName" required/>
+                        </label>
+                        <label class="item item-input item-stacked-label">
+                            <span class="input-label">Slug</span>
+                            <input type="text" value="{{item.slug}}" ng-model="item.slug" required/>
+                        </label>
+                        <label class="item item-stacked-label">
+                            <span class="input-label">Keywords</span>
+                            <tags-input ng-model="item.keywords" required></tags-input>
+                            <p>Type a keyword and hit enter to add it</p>
+                        </label>
+                        <div class="item item-toggle">
+                            Active
+                            <label class="toggle toggle-assertive">
+                                <input type="checkbox" ng-model="item.active">
+                                <div class="track">
+                                    <div class="handle"></div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="item" ng-if="!saving" ng-if="item">
+                            <h2 class="assertive">Disclaimer: Deleting an active store may fuck shit up, be careful.</h2>
+                        </div>
+                        <div class="item" ng-if="!saving">
+                            <button class="button button-positive button-block" type="submit" ng-disabled="saving">Save Changes</button>
+                        </div>
+                        <div class="item text-center" ng-if="saving">
+                            <ion-spinner></ion-spinner><br />Saving
+                        </div>
+                        <div class="item assertive" ng-if="error">
+                            <h2>Error</h2>
+                            <p>{{localizationsError}}</p>
+                        </div>
+                    </form>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="item">
+                            <h2>Venues</h2>
+                        </div>
+                        <div class="text-center item" ng-if="false"><ion-spinner></ion-spinner><p>Loading</p></div>
+                        <ion-item ng-repeat="venue in item.venues">
+                            <div class="card">
+                                {{venue}}
+                            </div>
+                            <div class="card" ng-if="item.removing">
+                                <div class="item text-center">
+                                    <ion-spinner></ion-spinner> Deleting
+                                </div>
+                            </div>
+                        </ion-item>
+                        <div class="item positive" ng-if="!loading && !item.venues">
+                            <p>No venues found</p>
+                        </div>
+                        <div class="item assertive" ng-if="false">
+                            <h2>Error</h2>
+                            <p>{{localizationsError}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ion-content>
+</ion-view>

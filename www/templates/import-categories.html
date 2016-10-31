@@ -1,0 +1,39 @@
+<ion-modal-view>
+  <ion-header-bar class="bar-stable">
+    <h1 class="title">Import Categories</h1>
+  </ion-header-bar>
+  <ion-content class="has-footer" delegate-handle="categories-import-scroll">
+    <div class="padding assertive" ng-if="importError.length">
+      <p>Done but with some errors</p>
+      <ul>
+        <li ng-repeat="e in importError">{{e}}</li>
+      </ul>
+    </div>
+    <div class="padding assertive" ng-if="!previewRecords.length">
+      No valid records found in tha CSV, please validate it and try again.
+    </div>
+    <table id="import-table" class="zebra bordered" ng-if="previewRecords.length">
+      <thead>
+        <tr>
+          <th>ID</id>
+            <th>Name</th>
+            <th>Keywords</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="record in previewRecords track by $index">
+            <td>{{$index}}</td>
+            <td>{{record.displayName}}</td>
+            <td>{{record.keywords.toString()}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </ion-content>
+    <ion-footer-bar class="bar-stable">
+      <h1 class="title"></h1>
+      <div class="buttons" side="right">
+        <button type="button" class="button button-positive" ng-click="save()" ng-disabled="!previewRecords.length">Save</button>
+        <button type="button" class="button button-assertive button-clear" ng-click="cancel()">Cancel</a>
+        </div>
+      </ion-footer-bar>
+    </ion-modal-view>

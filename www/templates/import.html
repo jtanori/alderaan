@@ -9,7 +9,7 @@
                 <ion-spinner></ion-spinner>
                 <p>Working...</p>
             </div>
-            <div class="padding" ng-if="!records && !categoryImportModel.items">
+            <div class="padding" ng-if="!records && !categoryImportModel.items.length">
                 <div id="import-drop" class="container row">
                     <div class="col col-center text-center" ng-if="!loading && !records">
                         <div class="button button-positive" ngf-select="upload($files)" ngf-multiple="false">Import Global</div>
@@ -21,7 +21,7 @@
                     </div>
                 </div>
             </div>
-            <div ng-if="records && !loading" class="padding">
+            <div ng-if="records && !loading" class="padding" ng-disabled="savingAll" ng-class="{disabled: savingAll}">
                 <table id="import-table" class="zebra bordered">
                     <thead>
                         <tr>
@@ -40,15 +40,22 @@
                             <td>{{key}}</td>
                             <td class="text-center">{{record.length}}</td>
                             <td class="text-center">
-                                <select ng-model="record.category">
-                                    <option value="{{c.id}}" ng-repeat="c in categories" required>{{c.name}}</option>
-                                </select>
+                              <input
+                                ng-model="record.categoryText"
+                                placeholder="Find Category"
+                                ng-model-options='{ debounce: 300 }'
+                                ng-change="categoryLookup(record)"
+                                ng-keydown="showAllCategories($event, record)">
+
+                                <ul class="list dropdown">
+                                  <li ng-repeat="category in record.categoriesFound" ng-click="setCategory(category, record)">{{category.name}}</li>
+                                </ul>
                             </td>
                             <td class="text-center"><input ng-model="record._additionalKeywords" ng-disabled="record.length == 1" ng-model-options="{debound:1000}"></td>
                             <td class="text-center"><button type="button" class="button button-small button-stable" ng-click="runFilter(key, record._additionalKeywords)">Filter</button></td>
                             <td class="text-center">
                                 <ion-spinner ng-if="record.saving"></ion-spinner>
-                                <button type="button" class="button button-small button-positive" ng-click="save(record, $index)" ng-if="!record.saving">Save</button>
+                                <button type="button" ng-class="{disabled: !record.category}" class="button button-small button-positive" ng-click="save(record, key)" ng-if="!record.saving">Save</button>
                             </td>
                         </tr>
                     </tbody>
@@ -89,20 +96,21 @@
                 </table>
             </div>
         </div>
+        <div ng-if="records" class="padding">
+          <button class="button button-positive button-block" ng-disabled="!canSaveAll()" ng-click="saveAll()">
+            Save All {{canSaveAll()}}
+          </div>
+        </div>
     </ion-content>
     <ion-footer-bar class="bar-stable" ng-if="records">
         <div class="buttons">
-            <button class="button ion-close icon-left button-assertive" ng-disabled="!categoryImportModel.items || categoryImportModel.items.length == 0 || saving" ng-click="cancelBatchImport()">Abort</button>
+            <button class="button ion-close icon-left button-assertive" ng-disabled="_.isEmpty(categoryImportModel.items) || _.isEmpty(records) || saving" ng-click="cancelBatchImport()">Abort</button>
         </div>
-        <h1 class="title">{{currentPage+1}}/{{pages}}</h1>
-        <div class="buttons">
-            <button class="button button-icon ion-arrow-left-b icon-left" ng-disabled="currentPage == 0 || loading" ng-click="prev()">Prev</button>
-            <select ng-model="data.currentPage" ng-change="goTo(data.currentPage)" ng-if="pages > 1">
-                <option>Jump to page</option>
-                <option ng-repeat="a in chunks" ng-selected="$index == currentPage" value="{{$index}}">{{$index+1}}</option>
-            </select>
-            <button class="button button-icon ion-arrow-right-b icon-right" ng-disabled="currentPage == chunks.length-1 || loading" ng-click="next()">Next</button>
-        </div>
+        <h1 class="title">
+          <button class="button button-icon ion-arrow-left-b icon-left" ng-disabled="currentPage == 0 || loading" ng-click="prev()">Prev</button>
+          {{currentPage+1}}/{{chunks.length}}
+          <button class="button button-icon ion-arrow-right-b icon-right" ng-disabled="currentPage == chunks.length-1 || loading" ng-click="next()">Next</button>
+        </h1>
     </ion-footer-bar>
     <ion-footer-bar class="bar-stable" ng-if="categoryImportModel.items && categoryImportModel.items.length">
         <div class="buttons">

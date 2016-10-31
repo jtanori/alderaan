@@ -7,8 +7,8 @@
         <div ng-if="role && role.name.toLowerCase() === 'superadmin'" data-tap-disabled="true">
             <form map-lazy-load="https://maps.google.com/maps/api/js" map-lazy-load-params="{{googleMapsURL}}">
                 <label class="item item-input" id="venue-search-box">
-                    <span class="input-label">Address</span>
-                    <input type="text" places-auto-complete ng-model="model.address" on-place-changed="placeChanged()" types="{{map.searchTypes}}">
+                    <span class="input-label">City</span>
+                    <input type="text" places-auto-complete ng-model="model.address" on-place-changed="placeChanged()">
                 </label>
                 <label class="item item-input" id="venue-search-box">
                     <span class="input-label">Search</span>
@@ -19,7 +19,8 @@
                         Category
                     </div>
                     <select ng-model="model.category">
-                        <option value="{{c.id}}" ng-repeat="c in categories" required>{{c.name}}</option>
+                      <option value="">No category selected</option>
+                      <option value="{{c.id}}" ng-repeat="c in categories" required>{{c.name}}</option>
                     </select>
                 </label>
                 <ng-map center="[{{map.center.latitude}}, {{map.center.longitude}}]" zoom="{{map.zoom}}" id="venue-search-map">

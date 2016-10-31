@@ -1,6 +1,6 @@
 angular.module('manager.controllers')
 
-.controller('CategoriesCtrl', function($scope, $rootScope, $timeout, $ionicPlatform, CategoriesService, $ionicLoading, $ionicModal, $ionicScrollDelegate, UtilsService){
+.controller('CategoriesCtrl', function($scope, $rootScope, $timeout, $ionicPlatform, CategoriesService, $ionicLoading, $ionicModal, $ionicScrollDelegate, UtilsService, validations){
     var _ = require('lodash');
 
     if(_.isEmpty($rootScope.user)){
@@ -8,12 +8,20 @@ angular.module('manager.controllers')
         return;
     }
 
+    var Papa = require('papaparse');
+    var slugify = require('underscore.string/slugify');
+    var cleanDiacritics = require('underscore.string/cleanDiacritics');
+    var validate = require('validate.js');
+    var notifier = require('node-notifier');
+
     $scope.categories = [];
     $scope.error = null;
     $scope.categoryMaster = {};
     $scope.slugify = require('underscore.string').slugify;
     $scope.titleize = require('underscore.string').titleize;
     $scope.data = {};
+    $scope.records = [];
+    $scope.previewRecords = [];
 
     $rootScope.$on('category:removed', function(e, id){
         $timeout(function(){
@@ -85,19 +93,10 @@ angular.module('manager.controllers')
 
     $scope.saveCategory = function(){
         var data = angular.copy($scope.category);
+        var validationsError = validate(validations.category);
 
-        if(_.isEmpty(data.displayName)){
-            alert('Please provide a display name for this category');
-        }else if(_.isEmpty(data.name)){
-            alert('Please provide a name for this category');
-        }else if(_.isEmpty(data.slug)){
-            alert('Please provide a slug for this category');
-        }else if(_.isEmpty(data.pluralized)){
-            alert('Please provide a pluralized name for this category');
-        }else if(_.isEmpty(data.keywords)){
-            alert('Please enter keywords');
-        } else {
-            data.keywords = data.keywords.map(function(k){return k.text;});
+        if(!validationsError) {
+            data.keywords = data.keywords.map(function(k){return k.text.toLowerCase();}).join(',');
 
             $timeout(function(){
                 $scope.$apply(function(){
@@ -177,6 +176,131 @@ angular.module('manager.controllers')
             $scope.category = null;
             $scope.newCategoryModal.hide();
         }
+    };
+
+    //Upload file to Manager
+    $scope.upload = function(files){
+      if (files && files.length) {
+        $timeout(function(){
+          $scope.$apply(function(){
+            $scope.loading = true;
+          });
+        });
+
+        var file = files[0];
+
+        Papa.parse(file, {
+          //worker: true,
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          complete: function(results){
+            if(results){
+              if(results.data){
+
+                $scope.importError = [];
+                $scope.records = results.data.filter(function(r) {
+                  try {
+                    var hasErrors = validate(r, validations.categoryImport);
+
+                    if(!hasErrors) {
+                      return r;
+                    } else {
+                      $scope.importError.push(validations.toArray(hasErrors));
+                    }
+                  } catch(e) {
+                    $scope.importError.push(e.message);
+                  }
+                });
+
+                console.log($scope.records);
+
+                $ionicScrollDelegate.$getByHandle('categories-scroll').resize();
+                $ionicScrollDelegate.$getByHandle('categories-scroll').scrollTop(false);
+
+                $scope.openImportModal();
+              }
+              if(results.errors && results.errors.length){
+                $scope.errors = results.errors;
+                $scope.error = 'Some errors found';
+                $scope.records = null;
+                $scope.documents = {};
+              }
+
+              $timeout(function(){
+                $scope.$apply(function(){
+                  $scope.loading = false;
+                });
+              });
+            }else{
+              $scope.error = 'Nothing to parse, please check your CSV file';
+            }
+          }
+        });
+      }
+    };
+
+    $scope.openImportModal = function(id){
+        $scope.previewRecords = $scope.records;
+
+        if(!$scope._previewModal){
+            $ionicModal.fromTemplateUrl('templates/import-categories.html', {
+                scope: $scope,
+                animation: 'slide-in-up'
+            }).then(function(modal) {
+                $scope._previewModal = modal;
+                $scope._previewModal
+                  .show()
+                  .then(function() {
+                    $ionicScrollDelegate.$getByHandle('categories-import-scroll').resize();
+                    $ionicScrollDelegate.$getByHandle('categories-import-scroll').scrollTop(false);
+                  });
+            });
+        }else{
+            $scope._previewModal
+              .show()
+              .then(function() {
+                $ionicScrollDelegate.$getByHandle('categories-import-scroll').resize();
+                $ionicScrollDelegate.$getByHandle('categories-import-scroll').scrollTop(false);
+              });
+        }
+    };
+
+    $scope.closeImportModal = function() {
+      $timeout(function() {
+        $scope.$apply(function() {
+          $scope.records = [];
+          $scope.previewRecords = [];
+          $scope._previewModal.hide();
+        });
+      });
+    }
+
+    $scope.save = function() {
+      if($scope.records) {
+        $ionicLoading.show({template: 'Importing Categories...'});
+        CategoriesService
+          .import($scope.records)
+          .then(function(results) {
+            $scope.closeImportModal();
+            notifier.notify({
+                title: 'Done',
+                message: 'Categories file has been imported',
+                sound: true, // Only Notification Center or Windows Toasters
+                wait: true // Wait with callback, until user action is taken against notification
+            });
+            $scope.refresh();
+          })
+          .finally(function() {
+            $ionicLoading.hide();
+          });
+      } else {
+        alert('Something went wrong', 'For some reason we did not find any records to save, please check your data and try again.');
+      }
+    };
+
+    $scope.cancel = function() {
+      $scope.closeImportModal();
     };
 
     $scope.$on('$ionicView.enter', function(){

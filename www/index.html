@@ -9,7 +9,6 @@
     <link href="css/style.css" rel="stylesheet">
     <link href="lib/ng-tags-input/ng-tags-input.min.css" rel="stylesheet">
     <link href="lib/angularjs-datepicker/dist/angular-datepicker.min.css" rel="stylesheet"/>
-
     <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
     <link href="css/ionic.app.css" rel="stylesheet">
     -->
@@ -17,8 +16,9 @@
     <!-- ionic/angularjs js -->
     <script>
         window._ = require('lodash');
+        window.Parse = require('parse');
     </script>
-    <script src="lib/ionic/js/ionic.bundle.js"></script>
+    <script src="lib/ionic/js/ionic.bundle.min.js"></script>
     <script src="lib/angularjs-datepicker/dist/angular-datepicker.min.js"></script>
     <script src="lib/ng-file-upload/ng-file-upload.min.js"></script>
     <script src="lib/papaparse/papaparse.js"></script>
@@ -27,7 +27,9 @@
 
     <!-- your app's js -->
     <script src="js/app.js"></script>
+    <script src="js/env.js"></script>
     <script src="js/config.js"></script>
+    <script src="js/services/api.js"></script>
     <script src="js/services/utils.js"></script>
     <script src="js/services/venue.js"></script>
     <script src="js/services/category.js"></script>
@@ -38,6 +40,9 @@
     <script src="js/services/geo.js"></script>
     <script src="js/services/analytics.js"></script>
     <script src="js/services/currency.js"></script>
+    <script src="js/services/validations.js"></script>
+    <script src="js/services/geolocation.js"></script>
+    <script src="js/services/store.js"></script>
     <script src="js/controllers.js"></script>
     <script src="js/controllers/login.js"></script>
     <script src="js/controllers/categories.js"></script>
@@ -47,6 +52,7 @@
     <script src="js/controllers/geo.js"></script>
     <script src="js/controllers/venues.js"></script>
     <script src="js/controllers/analytics.js"></script>
+    <script src="js/controllers/store.js"></script>
   </head>
 
   <body ng-app="manager">

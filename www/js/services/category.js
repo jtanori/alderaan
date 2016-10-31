@@ -237,6 +237,23 @@ angular.module('manager.services')
                 });
 
             return defer.promise;
+        },
+        import: function(data) {
+          var defer = $q.defer();
+
+          $http
+              .post(API_URL + '/manager/categories/import', {items: data})
+              .then(function(c){
+                  if(!_.isEmpty(c)){
+                      defer.resolve(c.data);
+                  }else{
+                      defer.reject({message: 'Could not save categories'});
+                  }
+              }, function(e){
+                  defer.reject({message: e.message, code: e.code});
+              });
+
+          return defer.promise;
         }
     }
 });

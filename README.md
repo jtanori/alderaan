@@ -6,9 +6,17 @@ To clone and run this repository you'll need [Git](https://git-scm.com) and [Nod
 
 ```bash
 # Clone this repository
-git clone https://github.com/jtanori/alderaan
+git clone
 # Go into the repository
-cd alderaan
+cd
 # Install dependencies and run the app
 npm install && npm start
 ```
+
+# For googleapis errors and quota problems refer to
+[https://www.chromium.org/developers/how-tos/api-keys]
+
+[http://freegeoip.net/json/]
+
+# For environment variables
+[http://electron.atom.io/docs/api/environment-variables/]

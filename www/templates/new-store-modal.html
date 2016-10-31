@@ -1,0 +1,48 @@
+<ion-modal-view>
+    <ion-header-bar class="bar-stable">
+        <h1 class="title">Add New Store</h1>
+    </ion-header-bar>
+    <ion-content>
+        <form class="card" novalidate>
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">Display Name</span>
+                <input type="text" value="{{model.displayName}}" ng-model="model.displayName" required ng-change="model.displayName = titleize(model.displayName)" ng-model-options="{debounce: 500}"/>
+            </label>
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">Slug</span>
+                <input type="text" value="{{model.slug}}" ng-model="model.slug" required ng-change="model.slug = slugify(model.slug)" ng-model-options="{debounce: 500}"/>
+            </label>
+            <label class="item item-stacked-label">
+                <span class="input-label">Keywords</span>
+                <tags-input ng-model="model.keywords" required></tags-input>
+                <p>Type a keyword and hit enter to add it</p>
+            </label>
+            <div class="item item-toggle">
+                Active
+                <label class="toggle toggle-assertive">
+                    <input type="checkbox" ng-model="model.active">
+                    <div class="track">
+                        <div class="handle"></div>
+                    </div>
+                </label>
+            </div>
+            <div class="item">
+                <h2 class="assertive">* All fields are required</h2>
+            </div>
+            <div class="item text-center" ng-if="saving">
+                <ion-spinner></ion-spinner> Saving
+            </div>
+            <div class="item assertive" ng-if="error">
+                <h2>Error</h2>
+                <p>{{error}}</p>
+            </div>
+        </form>
+    </ion-content>
+    <ion-footer-bar class="bar-stable">
+        <h1 class="title"></h1>
+        <div class="buttons" side="right">
+            <button type="button" class="button button-positive" ng-click="save()">Save</button>
+            <button type="button" class="button button-assertive button-clear" ng-click="cancel()">Cancel</a>
+        </div>
+    </ion-footer-bar>
+</ion-modal-view>

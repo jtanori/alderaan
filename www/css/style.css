@@ -166,3 +166,23 @@ table {
     background-repeat: no-repeat;
     background-size: contain;
 }
+
+input + .dropdown {
+  position: absolute;
+  z-index: 3;
+  background: white;
+  border: 1px solid lightgray;
+  max-height: 300px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  overflow-y: scroll;
+}
+
+input + .dropdown li {
+  text-align: left;
+  border-bottom: 1px solid lightgray;
+  padding: 0.5rem;
+}
+
+input + .dropdown li:last-child {
+  border-bottom-width: 0;
+}

@@ -1,6 +1,18 @@
-window.app
+window
+.app
+.config([
+  "$stateProvider",
+  "$urlRouterProvider",
+  "$ionicConfigProvider",
+  "$httpProvider",
+  "apiProvider",
+  function($stateProvider, $urlRouterProvider, $ionicConfigProvider, $httpProvider, apiProvider) {
 
-.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider, $httpProvider) {
+    apiProvider.configure('http://localhost:5001', {
+      'X-Parse-Application-Id': 'jound',
+      'X-Parse-Javascript-Key': 'jound-js'
+    });
+
     $stateProvider
 
         .state('app', {
@@ -191,15 +203,67 @@ window.app
             url: '/forgot/reset',
             templateUrl: 'templates/reset.html',
             controller: 'ResetCtrl'
+        })
+
+        .state('app.stores', {
+            url: '/stores',
+            views: {
+                'menuContent': {
+                    templateUrl: 'templates/stores.html',
+                    controller: 'StoresCtrl'
+                }
+            },
+            resolve: {
+              items: function(api) {
+                return api
+                  .get('/manager/stores')
+                  .then(function(response) {
+                    return response.results;
+                  })
+                  .catch(function(e) {
+                    return e;
+                  })
+                  .finally(function() {
+                    console.log('got stores');
+                  });
+              }
+            }
+        })
+
+        .state('app.store', {
+            url: '/stores/:id',
+            views: {
+                'menuContent': {
+                    templateUrl: 'templates/store.html',
+                    controller: 'StoreCtrl'
+                }
+            },
+            resolve: {
+              item: function(api, $stateParams) {
+                console.log($stateParams, 'state params');
+                return api
+                  .get('/manager/stores/' + $stateParams.id)
+                  .then(function(response) {
+                    console.log(response, 'store response');
+                    return response;
+                  })
+                  .catch(function(e) {
+                    return e;
+                  })
+                  .finally(function() {
+                    console.log('got store');
+                  });
+              }
+            }
         });
 
     $urlRouterProvider.otherwise(function ($injector, $location) {
         var $state = $injector.get("$state");
-        $state.go("login");
+        $state.go("home");
     });
     // if none of the above states are matched, use this as the fallback
-    $urlRouterProvider.otherwise('/login');
+    $urlRouterProvider.otherwise('/home');
 
     $ionicConfigProvider.tabs.position('bottom');
     $httpProvider.interceptors.push('responseObserver');
-});
+}]);

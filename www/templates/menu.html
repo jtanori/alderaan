@@ -23,20 +23,23 @@
                 <ion-item menu-close href="#/categories" ng-if="$parent.user.is('SuperAdmin') || $parent.user.is('Admin')">
                     <i class="icon ion-pound"></i> Categories
                 </ion-item>
-                <ion-item menu-close href="#/analytics">
-                    <i class="icon ion-connection-bars"></i> Analytics
-                </ion-item>
                 <ion-item menu-close href="#/venues">
                     <i class="icon ion-bag"></i> Venues
                 </ion-item>
+                <ion-item menu-close ui-sref="app.stores" ng-if="$parent.user.is('SuperAdmin') || $parent.user.is('Admin')">
+                    <i class="icon ion-card"></i> Stores
+                </ion-item>
                 <ion-item menu-close href="#/geo" ng-if="$parent.user.is('SuperAdmin') || $parent.user.is('Admin')">
                     <i class="icon ion-ios-world"></i> Geospatial
+                </ion-item>
+                <ion-item menu-close href="#/analytics">
+                    <i class="icon ion-connection-bars"></i> Analytics
                 </ion-item>
                 <ion-item menu-close href="#/import" ng-if="$parent.user.is('SuperAdmin') || $parent.user.is('Admin')">
                     <i class="icon ion-upload"></i> Import
                 </ion-item>
                 <ion-item menu-close href="#/profile">
-                    <i class="icon ion-upload"></i> Profile
+                    <i class="icon ion-happy-outline"></i> Profile
                 </ion-item>
                 <ion-item menu-close ng-click="logout()">
                     <i class="icon ion-log-out"></i> Logout
