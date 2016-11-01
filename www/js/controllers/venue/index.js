@@ -614,4 +614,24 @@ angular.module('manager.controllers')
             });
         }
     }, true);
+})
+
+.controller('VenueSocialCtrl', function() {
+
+})
+
+.controller('VenueGraphicsCtrl', function() {
+
+})
+
+.controller('VenueAboutCtrl', function() {
+
+})
+
+.controller('VenueReviewsCtrl', function() {
+
+})
+
+.controller('VenueDealsCtrl', function() {
+
 });

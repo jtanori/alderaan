@@ -57,15 +57,8 @@
                             <h2>Venues</h2>
                         </div>
                         <div class="text-center item" ng-if="false"><ion-spinner></ion-spinner><p>Loading</p></div>
-                        <ion-item ng-repeat="venue in item.venues">
-                            <div class="card">
-                                {{venue}}
-                            </div>
-                            <div class="card" ng-if="item.removing">
-                                <div class="item text-center">
-                                    <ion-spinner></ion-spinner> Deleting
-                                </div>
-                            </div>
+                        <ion-item ng-repeat="item in item.venues" ng-click="editVenue(item.venue)">
+                            {{item.venue.name}}
                         </ion-item>
                         <div class="item positive" ng-if="!loading && !item.venues">
                             <p>No venues found</p>

@@ -1,0 +1,14 @@
+<ion-view view-title="Reviews" id="venue-reviews">
+    <ion-content>
+        reviews
+    </ion-content>
+    <ion-footer-bar class="bar-stable">
+        <div class="buttons" ng-if="canSave">
+            <button class="button button-assertive" ng-click="cancel()"> Cancel</button>
+        </div>
+        <h1 class="title"></h1>
+        <div class="buttons">
+            <button class="button button-icon ion-upload icon-left" ng-click="save()" ng-disabled="!canSave"> Save</button>
+        </div>
+    </ion-footer-bar>
+</ion-view>

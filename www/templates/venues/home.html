@@ -26,7 +26,7 @@
                 <ng-map center="[{{map.center.latitude}}, {{map.center.longitude}}]" zoom="{{map.zoom}}" id="venue-search-map">
                     <marker
                         position="[{{marker.get('position').latitude}}, {{marker.get('position').longitude}}]"
-                        ng-repeat="marker in items track by marker.id"
+                        ng-repeat="marker in items track by $index"
                         on-click="showVenue(marker)"></marker>
                     <marker
                         id="map-center-marker"

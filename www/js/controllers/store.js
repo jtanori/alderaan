@@ -44,7 +44,7 @@ angular.module('manager.controllers')
     };
 
     $scope.cancel = function() {
-
+      $scope.newItemModal.hide();
     };
 
     $scope.save = function() {
@@ -88,7 +88,13 @@ angular.module('manager.controllers')
     });
 })
 
-.controller('StoreCtrl', function($scope, item) {
-  console.log('store controllers', item);
+.controller('StoreCtrl', function($scope, item, $localStorage) {
   $scope.item = item;
+
+  $scope.editVenue = function(venue){
+      $localStorage.setObject('current-venue', venue);
+      $localStorage.set('current-venue-id', venue.objectId);
+      $localStorage.set('current-venue-option', 'home');
+      var w = window.open('venue.html', "Venue Editor");
+  };
 });

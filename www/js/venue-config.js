@@ -1,6 +1,14 @@
 window.app
 
-.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider, $httpProvider) {
+.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider, $httpProvider, apiProvider) {
+
+  apiProvider.configure('http://localhost:5001', {
+    'X-Parse-Application-Id': 'jound',
+    'X-Parse-Javascript-Key': 'jound-js'
+  });
+
+  console.log('load');
+
     $stateProvider
 
         .state('venue', {
@@ -30,6 +38,8 @@ window.app
 
                     var id = $localStorage.get('current-venue-id');
 
+                    console.log('venue');
+
                     return VenuesService
                         .getById(id)
                         .then(function(v){
@@ -42,17 +52,8 @@ window.app
             }
         })
 
-        .state('venue.home', {
-            url: '/home',
-            views: {
-                'menuContent': {
-                    templateUrl: 'templates/venue/home.html'
-                }
-            }
-        })
-
         .state('venue.configuration', {
-            url: '/configuration',
+            url: '/',
             views: {
                 'menuContent': {
                     templateUrl: 'templates/venue/configuration.html',
@@ -121,14 +122,106 @@ window.app
                         });
                 }
             }
+        })
+
+        .state('venue.social', {
+            url: '/social',
+            views: {
+                'menuContent': {
+                    templateUrl: 'templates/venue/social-networks.html',
+                    controller: 'VenueSocialCtrl'
+                }
+            },
+            resolve: {
+
+            }
+        })
+
+        .state('venue.graphics', {
+            url: '/graphics',
+            views: {
+                'menuContent': {
+                    templateUrl: 'templates/venue/graphics.html',
+                    controller: 'VenueGraphicsCtrl'
+                }
+            },
+            resolve: {
+
+            }
+        })
+
+        .state('venue.about', {
+            url: '/about',
+            views: {
+                'menuContent': {
+                    templateUrl: 'templates/venue/about.html',
+                    controller: 'VenueAboutCtrl'
+                }
+            },
+            resolve: {
+
+            }
+        })
+
+        .state('venue.reviews', {
+            url: '/reviews',
+            views: {
+                'menuContent': {
+                    templateUrl: 'templates/venue/reviews.html',
+                    controller: 'VenueReviewsCtrl'
+                }
+            },
+            resolve: {
+
+            }
+        })
+
+        .state('venue.products', {
+            url: '/products',
+            views: {
+                'menuContent': {
+                    templateUrl: 'templates/venue/products.html',
+                    controller: 'VenueProductsCtrl'
+                }
+            },
+            resolve: {
+              items: function(api, $ionicLoading, $localStorage) {
+                $ionicLoading.show({template: 'Loading Event'});
+
+                var id = $localStorage.get('current-venue-id');
+                return api.get('/manager/venues/' + id + '/products')
+                  .then(function(response) {
+                    return response.results;
+                  })
+                  .catch(function(e) {
+                    return e;
+                  })
+                  .finally(function() {
+                    $ionicLoading.hide();
+                  });
+              }
+            }
+        })
+
+        .state('venue.deals', {
+            url: '/deals',
+            views: {
+                'menuContent': {
+                    templateUrl: 'templates/venue/deals.html',
+                    controller: 'VenueDealsCtrl'
+                }
+            },
+            resolve: {
+
+            }
         });
 
     $urlRouterProvider.otherwise(function ($injector, $location) {
         var $state = $injector.get("$state");
-        $state.go("venue.home");
+        $state.go("venue.configuration");
     });
     // if none of the above states are matched, use this as the fallback
-    $urlRouterProvider.otherwise('/venue');
+    $urlRouterProvider.otherwise('/');
 
     $ionicConfigProvider.tabs.position('bottom');
     $httpProvider.interceptors.push('responseObserver');
@@ -138,6 +231,7 @@ window.app
 
     var venue = $localStorage.getObject('current-venue');
     var option = $localStorage.get('current-venue-option');
+    console.log(option, 'current option');
     //No venue, no deal
     if(!venue){
         window.close();
@@ -145,13 +239,18 @@ window.app
         $rootScope.venue = venue;
 
         switch(option){
-        case 'events':
-            $state.go('venue.events');
-        break;
+        case 'about':
         case 'configuration':
-            $state.go('venue.configuration');
+        case 'deals':
+        case 'events':
+        case 'graphics':
+        case 'products':
+        case 'reviews':
+        case 'social':
+        console.log('will go to ', option);
+            $state.go('venue.' + option);
         break;
-        default: $state.go('venue.home');
+        default: $state.go('venue.configuration');
         }
     }
 });

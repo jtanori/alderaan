@@ -512,7 +512,7 @@ angular.module('manager.services')
             var deferred = $q.defer();
 
             $http
-                .get(API_URL + '/manager/venue/' + id)
+                .get(API_URL + '/manager/venues/' + id)
                 .then(function(response){
                     deferred.resolve(Venue.create(response.data));
                 }, function(response){
@@ -526,7 +526,7 @@ angular.module('manager.services')
 
             if(!_.isEmpty(_currentVenue) && _currentVenue.id === venueId){
                 $http
-                    .get(API_URL + '/venue/' + venueId + '/products/' + productId)
+                    .get(API_URL + '/venues/' + venueId + '/products/' + productId)
                     .then(function(response){
                         if(response && response.data && response.data.product){
                             deferred.resolve({venue: _currentVenue, product: response.data.product});
@@ -624,7 +624,7 @@ angular.module('manager.services')
             }
 
             $http
-                .get(API_URL + '/venue/' + venueId + '/products', config)
+                .get(API_URL + '/venues/' + venueId + '/products', config)
                 .then(function(response){
                     deferred.resolve(response.data.results);
                 }, function(response){
@@ -694,7 +694,7 @@ angular.module('manager.services')
             }
 
             $http
-                .get(API_URL + '/venue/'+ venueId + '/events' + skip)
+                .get(API_URL + '/venues/'+ venueId + '/events' + skip)
                 .then(function(response){
                     deferred.resolve(response.data.results);
                 }, function(response){
@@ -708,7 +708,7 @@ angular.module('manager.services')
 
             if(venueId && data){
                 $http
-                    .post(API_URL + '/manager/venue/'+ venueId + '/events', {data: data})
+                    .post(API_URL + '/manager/venues/'+ venueId + '/events', {data: data})
                     .then(function(response){
                         deferred.resolve(response.data.results);
                     }, function(response){
@@ -777,7 +777,7 @@ angular.module('manager.services')
                 deferred.reject('Please login to claim a business');
             }else {
                 $http
-                    .post(API_URL + '/venue/' + id + '/claim', {id: id, userId: User.current().id, details: details})
+                    .post(API_URL + '/venues/' + id + '/claim', {id: id, userId: User.current().id, details: details})
                     .then(function(response){
                         deferred.resolve(response.data.results);
                     }, function(response){
@@ -794,7 +794,7 @@ angular.module('manager.services')
                 deferred.reject('Please provide a venue id.');
             }else {
                 $http
-                    .get(API_URL + '/venue/' + id + '/claimed')
+                    .get(API_URL + '/venues/' + id + '/claimed')
                     .then(function(response){
                         deferred.resolve(response.data.results);
                     }, function(response){
@@ -820,7 +820,7 @@ angular.module('manager.services')
                 deferred.reject('Please provide a venue id.');
             }else {
                 $http
-                    .post(API_URL + '/venue/' + id + '/report', {
+                    .post(API_URL + '/venues/' + id + '/report', {
                         id: id,
                         userId: User.current().id,
                         device: device,

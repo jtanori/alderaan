@@ -19,13 +19,13 @@ angular.module('manager.services')
 
             if(_.isEmpty(_currentResults) || force){
                 $http
-                    .get(API_URL + '/manager/venue/'+ venueId + '/events' + skip)
+                    .get(API_URL + '/manager/venues/'+ venueId + '/events' + skip)
                     .then(function(response){
                         _currentResults = response.data.results.map(function(e){
                             if(e.eventDay && e.eventDay.iso){
                                 e.eventDay = new Date(e.eventDay.iso);
                             }
-                            
+
                             return e;
                         });
 
@@ -51,7 +51,7 @@ angular.module('manager.services')
 
             if(venueId && data){
                 $http
-                    .post(API_URL + '/manager/venue/'+ venueId + '/events', {data: data})
+                    .post(API_URL + '/manager/venues/'+ venueId + '/events', {data: data})
                     .then(function(response){
                         if(response && response.data && response.data.eventDay){
                             response.data.eventDay = response.data.eventDay.iso;
@@ -76,7 +76,7 @@ angular.module('manager.services')
             var deferred = $q.defer();
 
             $http
-                .get(API_URL + '/manager/venue/' + venueId + '/events/' + eventId)
+                .get(API_URL + '/manager/venues/' + venueId + '/events/' + eventId)
                 .then(function(response){
                     deferred.resolve(response.data);
                 }, function(response){
@@ -95,7 +95,7 @@ angular.module('manager.services')
             var deferred = $q.defer();
 
             $http
-                .delete(API_URL + '/manager/venue/' + venueId + '/events/' + eventId)
+                .delete(API_URL + '/manager/venues/' + venueId + '/events/' + eventId)
                 .then(function(response){
                     deferred.resolve(response.data);
                 }, function(response){
@@ -114,7 +114,7 @@ angular.module('manager.services')
             var deferred = $q.defer();
 
             $http
-                .patch(API_URL + '/manager/venue/' + venueId + '/events/' + eventId, {data: data})
+                .patch(API_URL + '/manager/venues/' + venueId + '/events/' + eventId, {data: data})
                 .then(function(response){
                     deferred.resolve(response.data);
                 }, function(response){

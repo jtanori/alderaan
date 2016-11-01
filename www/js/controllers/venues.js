@@ -94,6 +94,7 @@ angular.module('manager.controllers')
             .then(function(results){
                 $timeout(function(){
                     $scope.$apply(function(){
+                      console.log('results', results);
                         $scope.items = results;
                     });
                 });

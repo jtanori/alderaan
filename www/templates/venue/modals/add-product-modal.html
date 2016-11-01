@@ -1,0 +1,60 @@
+<ion-modal-view>
+    <ion-header-bar class="bar-stable">
+        <h1 class="title">Add New Product</h1>
+    </ion-header-bar>
+    <ion-content delegate-handle="product-add-handle">
+        <form class="card" novalidate>
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">Display Name</span>
+                <input type="text" ng-model="model.displayName" required/>
+            </label>
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">Slug</span>
+                <input type="text"ng-model="model.slug" required ng-change="model.slug = slugify(model.slug)" ng-model-options="{debounce: 500}"/>
+            </label>
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">Price</span>
+                <input type="number"ng-model="model.price" required min="0"/>
+            </label>
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">Stock</span>
+                <input type="number"ng-model="model.stock" required min="0"/>
+            </label>
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">Unit Description</span>
+                <input type="text" ng-model="model.unitType" required placeholder="E.g. A box of 12 cans"/>
+            </label>
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">Product Description</span>
+                <textarea ng-model="model.description" required placeholder="Enter product description"></textarea>
+            </label>
+            <label class="item item-stacked-label">
+                <span class="input-label">Keywords</span>
+                <tags-input ng-model="model.keywords" required></tags-input>
+                <p>Type a keyword and hit enter to add it</p>
+            </label>
+            <div class="item item-toggle">
+                Active
+                <label class="toggle toggle-assertive">
+                    <input type="checkbox" ng-model="model.active">
+                    <div class="track">
+                        <div class="handle"></div>
+                    </div>
+                </label>
+            </div>
+            <div class="item">
+                <h2 class="assertive">* All fields are required</h2>
+            </div>
+            <div class="item text-center" ng-if="saving">
+                <ion-spinner></ion-spinner> Saving
+            </div>
+        </form>
+    </ion-content>
+    <ion-footer-bar class="bar-stable">
+        <h1 class="title"></h1>
+        <div class="buttons" side="right">
+            <button type="button" class="button button-positive" ng-click="save()">Save</button>
+            <button type="button" class="button button-assertive button-clear" ng-click="cancel()">Cancel</a>
+        </div>
+    </ion-footer-bar>
+</ion-modal-view>

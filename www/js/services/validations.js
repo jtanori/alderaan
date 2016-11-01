@@ -27,10 +27,12 @@ angular.module('manager.services')
       presence: true
     },
     active: {
-      presence: true
+      presence: true,
+      inclusion: [true, false]
     },
     primary: {
-      presence: true
+      presence: true,
+      inclusion: [true, false]
     }
   },
   countryImport: {
@@ -50,10 +52,19 @@ angular.module('manager.services')
       }
     },
     slug: {
-      presence: true
+      presence: true,
+      length: {
+        minimum: 3
+      },
+      format: {
+        pattern: "[a-z0-9\-]+",
+        flags: "i",
+        message: "can only contain a-z, 0-9 and - (dashes)"
+      }
     },
     active: {
-      presence: true
+      presence: true,
+      inclusion: [true, false]
     }
   },
   category: {
@@ -91,13 +102,60 @@ angular.module('manager.services')
     slug: {
       presence: true,
       length: {
-        minimum: 2
+        minimum: 3
+      },
+      format: {
+        pattern: "[a-z0-9\-]+",
+        flags: "i",
+        message: "can only contain a-z, 0-9 and - (dashes)"
       }
     },
     keywords: {
       presence: true,
       length: {
         minimum: 2
+      }
+    }
+  },
+  product: {
+    displayName: {
+      presence: true,
+      length: {
+        minimum: 2
+      }
+    },
+    slug: {
+      presence: true,
+      length: {
+        minimum: 3
+      },
+      format: {
+        pattern: "[a-z0-9\-]+",
+        flags: "i",
+        message: "can only contain a-z, 0-9 and - (dashes)"
+      }
+    },
+    keywords: {
+      presence: true,
+      length: {
+        minimum: 2
+      }
+    },
+    active: {
+      presence: true,
+      inclusion: [true, false]
+    },
+    stock: {
+      presence: true,
+      numericality: {
+        onlyInteger: true,
+        greaterThanOrEqualTo: 0
+      }
+    },
+    price: {
+      presence: true,
+      numericality: {
+        greaterThanOrEqualTo: 0
       }
     }
   },

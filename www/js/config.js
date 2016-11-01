@@ -214,7 +214,8 @@ window
                 }
             },
             resolve: {
-              items: function(api) {
+              items: function(api, $ionicLoading) {
+                $ionicLoading.show({template: 'Loading Stores...'});
                 return api
                   .get('/manager/stores')
                   .then(function(response) {
@@ -225,6 +226,7 @@ window
                   })
                   .finally(function() {
                     console.log('got stores');
+                    $ionicLoading.hide();
                   });
               }
             }
@@ -239,8 +241,9 @@ window
                 }
             },
             resolve: {
-              item: function(api, $stateParams) {
+              item: function(api, $stateParams, $ionicLoading) {
                 console.log($stateParams, 'state params');
+                $ionicLoading.show({template: 'Loading Store...'});
                 return api
                   .get('/manager/stores/' + $stateParams.id)
                   .then(function(response) {
@@ -252,6 +255,7 @@ window
                   })
                   .finally(function() {
                     console.log('got store');
+                    $ionicLoading.hide();
                   });
               }
             }
