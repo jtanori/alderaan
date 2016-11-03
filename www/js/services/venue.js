@@ -514,7 +514,7 @@ angular.module('manager.services')
             $http
                 .get(API_URL + '/manager/venues/' + id)
                 .then(function(response){
-                    deferred.resolve(Venue.create(response.data));
+                    deferred.resolve(Venue.create(response.data[0]));
                 }, function(response){
                     deferred.reject(response);
                 });

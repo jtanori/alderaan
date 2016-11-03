@@ -5,7 +5,7 @@
     <ion-nav-buttons side="right">
         <a ng-click="remove()" class="button button-icon ion-ios-trash"></a>
     </ion-nav-buttons>
-    <ion-content delegate-handle="store-scrolle">
+    <ion-content delegate-handle="store-scroll">
         <div class="text-center padding" ng-if="loading"><ion-spinner></ion-spinner><p>Loading...</p></div>
         <div ng-if="!loading && item">
             <div class="row">
@@ -52,22 +52,30 @@
                     </form>
                 </div>
                 <div class="col">
-                    <div class="card">
-                        <div class="item">
-                            <h2>Venues</h2>
-                        </div>
-                        <div class="text-center item" ng-if="false"><ion-spinner></ion-spinner><p>Loading</p></div>
-                        <ion-item ng-repeat="item in item.venues" ng-click="editVenue(item.venue)">
-                            {{item.venue.name}}
-                        </ion-item>
-                        <div class="item positive" ng-if="!loading && !item.venues">
+                    <ul class="list card">
+                        <li class="item item-button-right">
+                            Venues
+                            <button class="button button-positive" ng-click="add()">
+                              <i class="icon ion-plus-round"></i>
+                            </button>
+                        </li>
+                        <li class="item item-toggle-dynamic" ng-repeat="item in item.venues">
+                          <div ng-click="editVenue(item.venue)">{{item.venue.name}}</div>
+                          <label class="toggle">
+                            <input type="checkbox" ng-model="item.active">
+                            <div class="track">
+                              <div class="handle"></div>
+                            </div>
+                          </label>
+                        </li>
+                        <li class="item positive" ng-if="!loading && !item.venues">
                             <p>No venues found</p>
-                        </div>
-                        <div class="item assertive" ng-if="false">
+                        </li>
+                        <li class="item assertive" ng-if="false">
                             <h2>Error</h2>
                             <p>{{localizationsError}}</p>
-                        </div>
-                    </div>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>

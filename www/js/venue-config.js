@@ -38,7 +38,7 @@ window.app
 
                     var id = $localStorage.get('current-venue-id');
 
-                    console.log('venue');
+                    console.log('venue', id);
 
                     return VenuesService
                         .getById(id)

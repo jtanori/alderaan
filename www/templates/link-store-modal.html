@@ -1,0 +1,39 @@
+<ion-modal-view>
+    <ion-header-bar class="bar-stable">
+        <h1 class="title">Link Stores</h1>
+    </ion-header-bar>
+    <ion-content>
+        <form class="card" novalidate>
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">Venue ID(s)</span>
+                <input placeholder="comma separated values" type="text" ng-model="model.id" required ng-change="fetch()" ng-model-options="{debounce: 1000}"/>
+            </label>
+            <div class="item overflow item-button-right" ng-repeat="item in fetchedVenues">
+                <h2>{{item.name}}</h2>
+                <p>{{item.full_address}}</p>
+                <p>{{item.municipality}}, {{item.federal_entity}}</p>
+
+                <button class="button button-positive btn.link" ng-click="linkVenue(item, $index)" ng-if="!item.linking">
+                  Link
+                </button>
+
+                <div class="button button-positive btn.link" ng-if="item.linking">
+                    <ion-spinner></ion-spinner> Linking
+                </div>
+            </div>
+            <div class="item text-center" ng-if="loadingVenues">
+                <ion-spinner></ion-spinner> Searching Venues
+            </div>
+            <div class="item assertive" ng-if="error">
+                <h2>Error</h2>
+                <p>{{error}}</p>
+            </div>
+        </form>
+    </ion-content>
+    <ion-footer-bar class="bar-stable">
+        <h1 class="title"></h1>
+        <div class="buttons" side="right">
+          <button type="button" class="button button-assertive button-clear" ng-click="cancel()">Close</a>
+        </div>
+    </ion-footer-bar>
+</ion-modal-view>
