@@ -185,13 +185,50 @@ window.app
                 }
             },
             resolve: {
-              items: function(api, $ionicLoading, $localStorage) {
+              items: function($rootScope, $ionicLoading, $localStorage, api) {
+
+                if($rootScope.products) {
+                  return $rootScope.products;
+                }
+                
                 $ionicLoading.show({template: 'Loading Event'});
 
                 var id = $localStorage.get('current-venue-id');
                 return api.get('/manager/venues/' + id + '/products')
                   .then(function(response) {
+                    console.log(response, 'response');
+                    $rootScope.products = response.results;
+
                     return response.results;
+                  })
+                  .catch(function(e) {
+                    return e;
+                  })
+                  .finally(function() {
+                    $ionicLoading.hide();
+                  });
+              }
+            }
+        })
+
+        .state('venue.product', {
+            url: '/products/:id',
+            views: {
+                'menuContent': {
+                    templateUrl: 'templates/venue/product.html',
+                    controller: 'VenueProductCtrl'
+                }
+            },
+            resolve: {
+              item: function(api, $ionicLoading, $localStorage, $stateParams) {
+                $ionicLoading.show({template: 'Loading Event'});
+
+                var id = $localStorage.get('current-venue-id');
+                var productId = $stateParams.id;
+
+                return api.get('/manager/venues/' + id + '/products/' + productId)
+                  .then(function(response) {
+                    return response;
                   })
                   .catch(function(e) {
                     return e;

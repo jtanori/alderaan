@@ -44,6 +44,9 @@ angular
       put: function $apiPut(path, data) {
         return request(API_URL + path, 'PUT', data, HEADERS);
       },
+      patch: function $apiPatch(path, data) {
+        return request(API_URL + path, 'PATCH', data, HEADERS);
+      },
       delete: function $apiDelete(path, data) {
         return request(API_URL + path, 'DELETE', data, HEADERS);
       },

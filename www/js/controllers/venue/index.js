@@ -8,8 +8,6 @@ angular.module('manager.controllers')
         window.close();
         return;
     };
-
-    console.log('venue i got', venue);
 })
 
 .controller('VenueConfigurationCtrl', function($rootScope, $scope, $state, $timeout, $ionicLoading, VenuesService){

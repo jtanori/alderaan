@@ -6,7 +6,7 @@
   </ion-nav-buttons>
   <ion-content delegate-handle="products-scroll">
     <ion-list ng-if="items && items.length">
-      <ion-item ng-repeat="item in items">
+      <ion-item ng-repeat="item in items" ui-sref="venue.product({id: item.product.objectId})">
         {{item.product.displayName}}
       </ion-item>
     </ion-list>
