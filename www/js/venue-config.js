@@ -38,8 +38,6 @@ window.app
 
                     var id = $localStorage.get('current-venue-id');
 
-                    console.log('venue', id);
-
                     return VenuesService
                         .getById(id)
                         .then(function(v){
@@ -190,7 +188,7 @@ window.app
                 if($rootScope.products) {
                   return $rootScope.products;
                 }
-                
+
                 $ionicLoading.show({template: 'Loading Event'});
 
                 var id = $localStorage.get('current-venue-id');
@@ -231,7 +229,7 @@ window.app
                     return response;
                   })
                   .catch(function(e) {
-                    return e;
+                    return new Error(e.data.message);
                   })
                   .finally(function() {
                     $ionicLoading.hide();

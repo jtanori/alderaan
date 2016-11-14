@@ -2,6 +2,9 @@
   <ion-nav-buttons side="left">
     <a ui-sref="venue.products" class="button button-icon ion-ios-arrow-back" ng-disabled="saving"></a>
   </ion-nav-buttons>
+  <ion-nav-buttons side="right">
+    <a class="button button-icon ion-ios-trash" ng-disabled="saving" ng-click="remove()"></a>
+  </ion-nav-buttons>
   <ion-content>
     <div id="import-drop" class="container row" style="background-image:url({{model.cover ? (model.cover.file ? model.cover.file.url : model.cover) : ''}})">
         <button ng-if="model.cover" type="button" class="button button-small margin-a top right absolute positioned" ng-click="removeCover()"><i class="icon ion-close"></i> Remove Cover</button>
@@ -10,8 +13,9 @@
                 ngf-select="uploadCover($files)"
                 ngf-multiple="false"
                 ngf-pattern="'image/*'"
-                ngf-accept="'image/*'" ngf-max-size="5MB" ngf-min-width="600"
-                ngf-resize="{width: 600, height: 600}">Upload Cover Picture</div>
+                ngf-accept="'image/*'"
+                ngf-max-size="5MB"
+                ngf-min-width="300">Upload Cover Picture</div>
             <button class="button button-light button-small" type="button">
                 <i class="icon ion-link"></i> Use URL instead
             </button>
@@ -63,7 +67,7 @@
     </div>
     <h1 class="title"></h1>
     <div class="buttons">
-      <button class="button button-icon ion-upload icon-left" ng-click="save()" ng-disabled="!canSave"> Save</button>
+      <button class="button button-positive" ng-click="save()" ng-disabled="!canSave"> Save</button>
     </div>
   </ion-footer-bar>
 </ion-view>

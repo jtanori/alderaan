@@ -10,44 +10,84 @@
         <div ng-if="!loading && item">
             <div class="row">
                 <div class="col">
-                    <form class="card" ng-submit="save()">
+                    <form class="card" ng-submit="update()">
                         <div class="item" ng-if="item">
                             <h2>Store Details</h2>
                         </div>
                         <label class="item item-input item-stacked-label">
                             <span class="input-label">Display Name</span>
-                            <input type="text" value="{{item.displayName}}" ng-model="item.displayName" required/>
+                            <input type="text" ng-model="model.displayName" required/>
                         </label>
                         <label class="item item-input item-stacked-label">
                             <span class="input-label">Slug</span>
-                            <input type="text" value="{{item.slug}}" ng-model="item.slug" required/>
+                            <input type="text" ng-model="model.slug" required/>
+                        </label>
+                        <label class="item item-input item-stacked-label">
+                            <span class="input-label">Local Shipping Cost</span>
+                            <input type="number" min="0" ng-model="model.localShippingCost" required/>
+                        </label>
+                        <label class="item item-input item-stacked-label">
+                            <span class="input-label">Minimum Local Sale</span>
+                            <input type="number" min="0" ng-model="model.localSaleMinimumAmount" required/>
+                        </label>
+                        <label class="item item-input item-stacked-label">
+                            <span class="input-label">Domestic Shipping Cost</span>
+                            <input type="number" min="0" ng-model="model.domesticShippingCost" required/>
+                        </label>
+                        <label class="item item-input item-stacked-label">
+                            <span class="input-label">Minimum Domestic Sale</span>
+                            <input type="number" min="0" ng-model="model.domesticSaleMinimumAmount" required/>
                         </label>
                         <label class="item item-stacked-label">
                             <span class="input-label">Keywords</span>
-                            <tags-input ng-model="item.keywords" required></tags-input>
+                            <tags-input ng-model="model.keywords" required></tags-input>
                             <p>Type a keyword and hit enter to add it</p>
                         </label>
                         <div class="item item-toggle">
                             Active
                             <label class="toggle toggle-assertive">
-                                <input type="checkbox" ng-model="item.active">
+                                <input type="checkbox" ng-model="model.active">
                                 <div class="track">
                                     <div class="handle"></div>
                                 </div>
                             </label>
                         </div>
-                        <div class="item" ng-if="!saving" ng-if="item">
+                        <label class="item item-input item-stacked-label">
+                            <span class="input-label">Conekta Public Key</span>
+                            <input type="text" ng-model="model.conektaPublicKey"/>
+                        </label>
+                        <label class="item item-input item-stacked-label">
+                            <span class="input-label">Conekta Private Key</span>
+                            <input type="text" ng-model="model.conektaPrivateKey"/>
+                        </label>
+                        <label class="item item-input item-stacked-label">
+                            <span class="input-label">Paypal Client Token</span>
+                            <input type="text" ng-model="model.paypalPublicKey"/>
+                        </label>
+                        <label class="item item-input item-stacked-label">
+                            <span class="input-label">Paypal Secret Token</span>
+                            <input type="text" ng-model="model.paypalSecretKey"/>
+                        </label>
+                        <label class="item item-input item-stacked-label">
+                            <span class="input-label">Store URL</span>
+                            <input type="text" ng-model="model.url"/>
+                        </label>
+                        <label class="item item-input item-stacked-label">
+                            <span class="input-label">Store Email Address</span>
+                            <input type="text" ng-model="model.email"/>
+                        </label>
+                        <div class="item" ng-if="!saving" ng-if="model">
                             <h2 class="assertive">Disclaimer: Deleting an active store may fuck shit up, be careful.</h2>
                         </div>
                         <div class="item" ng-if="!saving">
-                            <button class="button button-positive button-block" type="submit" ng-disabled="saving">Save Changes</button>
+                            <button class="button button-positive button-block" type="submit" ng-disabled="saving || !canSave()" ng-click="update()">Save Changes</button>
                         </div>
                         <div class="item text-center" ng-if="saving">
                             <ion-spinner></ion-spinner><br />Saving
                         </div>
                         <div class="item assertive" ng-if="error">
                             <h2>Error</h2>
-                            <p>{{localizationsError}}</p>
+                            <p>{{error}}</p>
                         </div>
                     </form>
                 </div>

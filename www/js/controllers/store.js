@@ -1,11 +1,12 @@
+/* globals angular: true, _:true, require: true */
 angular.module('manager.controllers')
 
-.controller('StoresCtrl', function($scope, $timeout, $rootScope, $state, $ionicPlatform, $ionicLoading, $ionicScrollDelegate, $ionicModal, validations, items, api){
+.controller('StoresCtrl', function ($scope, $timeout, $rootScope, $state, $ionicPlatform, $ionicLoading, $ionicScrollDelegate, $ionicModal, validations, items, api) {
     var _ = require('lodash');
 
-    if(_.isEmpty($rootScope.user)){
-        $state.go('app');
-        return;
+    if (_.isEmpty($rootScope.user)) {
+      $state.go('app');
+      return;
     }
 
     var Papa = require('papaparse');
@@ -88,21 +89,72 @@ angular.module('manager.controllers')
     });
 })
 
-.controller('StoreCtrl', function($scope, item, $localStorage, $ionicModal, $timeout, $ionicScrollDelegate, api) {
+.controller('StoreCtrl', function($scope, item, $localStorage, $ionicModal, $ionicLoading, $timeout, $ionicScrollDelegate, api, validations) {
 
   var notifier = require('node-notifier');
   var dialog = require('electron').remote.dialog;
+  var validate = require('validate.js');
 
   $scope.item = item;
-  $scope.model = {
-    id: null
-  };
+  $scope.model = angular.copy(item);
 
   $scope.editVenue = function(venue){
       $localStorage.setObject('current-venue', venue);
       $localStorage.set('current-venue-id', venue.objectId);
       $localStorage.set('current-venue-option', 'home');
       var w = window.open('venue.html', "Venue Editor");
+  };
+
+  $scope.update = function() {
+    var data = _.omit($scope.model, ['objectId', 'venues', 'updatedAt', 'createdAt']);
+    var currentData = _.omit($scope.item, ['objectId', 'venues', 'updatedAt', 'createdAt']);
+    var validationErrors = validate(data, validations.store);
+    var patch = {};
+
+    if(!validationErrors) {
+      data.keywords = data.keywords.map(function(k) {return _.isString(k.text) ? k.text : k;});
+
+      _.each(data, function(v, i) {
+        if(!_.isEqual(v, currentData[i])) {
+          patch[i] = v;
+        }
+      });
+
+      $ionicLoading.show({template: 'Saving...'});
+
+      api
+        .patch('/manager/stores/' + $scope.item.objectId, patch)
+        .then(function(response) {
+          $timeout(function() {
+            $scope.$apply(function() {
+              $scope.item = angular.extend($scope.item, response);
+              $scope.model = angular.copy($scope.item);
+
+              notifier.notify({
+                  title: 'Done',
+                  message: 'Store has been updated',
+                  wait: false
+              });
+            });
+          });
+        })
+        .catch(function(e) {
+          dialog.showErrorBox('Error', e.data.message);
+        })
+        .finally(function(){
+          $ionicLoading.hide();
+        });
+    } else {
+      dialog.showErrorBox('Error', validations.toArray(validationErrors).join('\n'));
+    }
+  };
+
+  $scope.canSave = function() {
+    var data = _.omit($scope.model, ['objectId', 'venues', 'updatedAt', 'createdAt']);
+    var currentData = _.omit($scope.item, ['objectId', 'venues', 'updatedAt', 'createdAt']);
+    var validationErrors = validate(data, validations.store);
+
+    return !validationErrors && !_.isEqual(data, currentData);
   };
 
   $scope.add = function() {

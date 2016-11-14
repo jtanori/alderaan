@@ -33,25 +33,25 @@ angular
     $ionicLoading.show({template: 'Reloading...'});
 
     api
-    .get('/manager/venues/' + $rootScope.venue.id + '/products')
-    .then(function(response) {
-      $timeout(function() {
-        $scope.$apply(function() {
-          $rootScope.products = response.results;
-          $scope.items = $rootScope.items;
+      .get('/manager/venues/' + $rootScope.venue.id + '/products')
+      .then(function(response) {
+        $timeout(function() {
+          $scope.$apply(function() {
+            $rootScope.products = response.results;
+            $scope.items = $rootScope.products;
+          });
         });
-      });
-    })
-    .catch(function(e) {
-      $timeout(function() {
-        $scope.$apply(function() {
-          $scope.error = e;
+      })
+      .catch(function(e) {
+        $timeout(function() {
+          $scope.$apply(function() {
+            $scope.error = e;
+          });
         });
+      })
+      .finally(function() {
+        $ionicLoading.hide();
       });
-    })
-    .finally(function() {
-      $ionicLoading.hide();
-    });
   };
 
   $scope.add = function() {
@@ -87,10 +87,11 @@ angular
         $timeout(function() {
           $scope.$apply(function() {
             $scope.model = angular.copy(master);
-            $ionicScrollDelegate.$getByHandle('product-add-handle').resize();
             $scope.items.push(response);
-          })
-        })
+            $scope.newItemModal.hide();
+            $scope.newItemModal = null;
+          });
+        });
         notifier.notify({
           title: 'Done',
           message: 'Product has been added',
@@ -101,20 +102,28 @@ angular
         alert('Error', e.data.message);
       })
       .finally(function() {
-        $ionicLoading.hide();
-        $ionicScrollDelegate.$getByHandle('products-scroll').resize();
-        $ionicScrollDelegate.$getByHandle('product-add-handle').resize();
+        $timeout(function() {
+          $scope.$apply(function() {
+            $ionicLoading.hide();
+            $ionicScrollDelegate.$getByHandle('products-scroll').resize();
+          });
+        }, 500);
       });
     } else {
-      dialog.showErrorBox('Error', validations.toArray(validationErrors).join('\n'))
+      dialog.showErrorBox('Error', validations.toArray(validationErrors).join('\n') || 'An error occurred');
     }
   };
 })
 
-.controller('VenueProductCtrl', function($scope, $rootScope, $ionicLoading, $timeout, item, api) {
+.controller('VenueProductCtrl', function($scope, $rootScope, $ionicLoading, $timeout, $state, item, api) {
 
   const dialog = require('electron').remote.dialog;
-  
+
+  if(item instanceof Error) {
+    dialog.showErrorBox('Error', item.message);
+    $state.go('venue.products');
+  }
+
   $scope.item = item;
   $scope.model = angular.copy(item);
   $scope.canSave = false;
@@ -133,10 +142,8 @@ angular
 
         x.readAsDataURL(file[0]);
       }catch(e){
-        dialog.showErrorBox('Error', e.message);
+        dialog.showErrorBox('Error', e.data.message || 'An error occurred');
       }
-    }else if ($scope.model){
-      $scope.model.file = null;
     }
   };
 
@@ -145,7 +152,7 @@ angular
       $scope.$apply(function() {
         if(_.isEmpty($scope.model._cover)) {
 
-          delete $scope.model.cover;
+          $scope.model.cover = null;
         } else {
           $scope.model.cover = $scope.model._cover;
         }
@@ -161,8 +168,10 @@ angular
   };
 
   $scope.save = function(){
-    var options = _.omit(angular.copy($scope.model), ['_cover', '_icon']);
+    var options = _.omit(angular.copy($scope.model), ['_cover', '_icon', 'fileType']);
     var changed = {};
+
+    console.log(options);
 
     options.keywords = _.map(options.keywords, 'text');
 
@@ -175,6 +184,10 @@ angular
     if(_.isEmpty(changed)) {
       alert('Nothing to change');
       return;
+    }
+
+    if(changed.cover) {
+      changed.fileType = $scope.model.fileType;
     }
 
     $ionicLoading.show({template: 'Updating'});
@@ -190,7 +203,36 @@ angular
         });
       })
       .catch(function(e) {
-        dialog.showErrorBox('Error', e.data.message);
+        dialog.showErrorBox('Error', e.data.message || 'An error occurred');
+      })
+      .finally(function() {
+        $ionicLoading.hide();
+      });
+  };
+
+  $scope.remove = function() {
+    if(!confirm('Do you really want to delete')) {
+      return;
+    }
+
+    $ionicLoading.show({template: 'Deleting Product...'});
+
+    api
+      .delete('/manager/venues/' + $rootScope.venue.id + '/products/' + $scope.item.objectId)
+      .then(function(response) {
+
+        var index = _.findIndex($rootScope.products, function(p) {
+          return p.product.objectId === $scope.item.objectId;
+        });
+
+        if(index >= 0) {
+          $rootScope.products.splice(index, 1);
+        }
+
+        $state.go('venue.products');
+      })
+      .catch(function(e) {
+        dialog.showErrorBox('Error', e.data.message || 'An error occurred');
       })
       .finally(function() {
         $ionicLoading.hide();
@@ -198,14 +240,16 @@ angular
   };
 
   $scope.$watch('model', function(){
-    var model = angular.copy($scope.model);
+    if($scope.model && $scope.item) {
+      var model = angular.copy($scope.model);
 
-    model.keywords = model.keywords.map(function(k) { return _.isObject(k) ? k.text : k;});
+      model.keywords = model.keywords ? model.keywords.map(function(k) { return _.isObject(k) ? k.text : k;}) : [];
 
-    if(!_.isEqual($scope.item, model, true)){
-      $scope.canSave = true;
-    } else  {
-      $scope.canSave = false;
+      if(!_.isEqual($scope.item, model, true)){
+        $scope.canSave = true;
+      } else  {
+        $scope.canSave = false;
+      }
     }
   }, true);
 });

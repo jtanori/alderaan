@@ -115,6 +115,30 @@ angular.module('manager.services')
       length: {
         minimum: 2
       }
+    },
+    localShippingCost: {
+      presence: true,
+      numericality: {
+        greaterThanOrEqualTo: 0
+      }
+    },
+    localSaleMinimumAmount: {
+      presence: true,
+      numericality: {
+        greaterThanOrEqualTo: 0
+      }
+    },
+    domesticShippingCost: {
+      presence: true,
+      numericality: {
+        greaterThanOrEqualTo: 0
+      }
+    },
+    domesticSaleMinimumAmount: {
+      presence: true,
+      numericality: {
+        greaterThanOrEqualTo: 0
+      }
     }
   },
   product: {
