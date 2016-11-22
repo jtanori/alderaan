@@ -2,9 +2,9 @@ window.app
 
 .config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider, $httpProvider, apiProvider) {
 
-  apiProvider.configure('http://localhost:5001', {
-    'X-Parse-Application-Id': 'jound',
-    'X-Parse-Javascript-Key': 'jound-js'
+  apiProvider.configure('http://api.jound.mx', {
+    'X-Parse-Application-Id': '2d42ca0c-8ca7-40e4-a8f7-b5a09b07a96b',
+    'X-Parse-Javascript-Key': 'f2673746-8a8e-499e-9cfa-3c9194b8ffaf'
   });
 
   console.log('load');
